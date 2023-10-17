@@ -77,13 +77,13 @@ def act(text=None, run_gpt='gpt4', temperature=1., max_length=300):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--llm", type=str, required=True, choices=['gpt3', 'gpt4', 'claude'])
-    parser.add_argument("--temperature", type=float, required=False, default=1.0)
-    parser.add_argument("--max-length", type=int, required=False, default=1)
-    parser.add_argument("--proc-id", type=int, required=False, default=0)
-    parser.add_argument("--num-runs", type=int, required=False, default=1)
-    parser.add_argument("--prompt-version", type=str, required=False, default=None)
-    parser.add_argument("--prompt-length", type=str, required=True, default=None)
-    parser.add_argument("--condition", type=str, required=True, default=None)
+    parser.add_argument("--temperature", type=float, required=False, default=1.0, help="temperature for sampling")
+    parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
+    parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
+    parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
+    parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
+    parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
+    parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
 
     args = parser.parse_args()
     llm = args.llm
@@ -105,17 +105,17 @@ if __name__ == "__main__":
     for run in range(num_runs):
 
         if condition == 'stai':
-            instructions = retrieve_prompt(trauma_cue=None, relax_cue=None, length=None, condition=condition, version=prompt_version)
+            instructions = retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition=condition, version=prompt_version)
             action = act(instructions, llm, temperature, max_length)
 
         if condition=='trauma_stai':
             for trauma_cue in trauma_cues:
-                    instructions = retrieve_prompt(trauma_cue=trauma_cue, relax_cue=None, length=length, condition=condition, version=prompt_version)
+                    instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=None, length=length, condition=condition, version=prompt_version)
                     action = act(instructions, llm, temperature, max_length)
 
         elif condition == 'trauma_relaxation_stai':
             for trauma_cue in trauma_cues:
                 for relaxation_cue in relaxation_cues:
-                    instructions = retrieve_prompt(trauma_cue=trauma_cue, relax_cue=relaxation_cue, length=length, condition=condition, version=prompt_version)
+                    instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=relaxation_cue, length=length, condition=condition, version=prompt_version)
                     action = act(instructions, llm, temperature, max_length)
             
