@@ -1,4 +1,4 @@
-def retrieve_prompt(trauma_cue=None, relax_cue=None, length=None, condition=None, version='v0'):
+def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition=None, version='v0'):
 
 
     if condition == 'stai':
@@ -11,7 +11,7 @@ def retrieve_prompt(trauma_cue=None, relax_cue=None, length=None, condition=None
     
     elif condition == 'trauma_relaxation_stai':
         trauma = retrieve_traumaprompt(trauma_cue, length)
-        relax = retrieve_relaxation(relax_cue, length)
+        relax = retrieve_relaxation(relaxation_cue, length)
         stai = retrieve_stai(condition)
         instructions = trauma+relax+stai
 
