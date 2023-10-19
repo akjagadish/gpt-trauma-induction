@@ -103,7 +103,9 @@ if __name__ == "__main__":
 
     # run gpt models
     for run in range(num_runs):
-
+        #TODO: loop over questions
+        #TODO: pass question number to retrieve_prompt for stai
+        #TODO: check final text depending on the llms
         if condition == 'stai':
             instructions = retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition=condition, version=prompt_version)
             action = act(instructions, llm, temperature, max_length)
