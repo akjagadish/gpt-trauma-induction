@@ -1,21 +1,16 @@
-def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition=None, question_number, version='v0'):
+def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition=None, version='v0'):
 
 
-    if condition == 'stai':
-        instructions = retrieve_stai(question_number)
-
-    elif condition == 'trauma_stai':
+    if condition == 'trauma_stai':
         preprompt = retrieve_traumaprompt(trauma_cue, length)
-        stai = retrieve_stai(question_number)
         #TODO: line breaks for the preprompt
         #TODO: Q: A: depending the model
-        instructions = preprompt+stai
+        instructions = preprompt
     
     elif condition == 'trauma_relaxation_stai':
         trauma = retrieve_traumaprompt(trauma_cue, length)
         relax = retrieve_relaxation(relaxation_cue, length)
-        stai = retrieve_stai(question_number)
-        instructions = trauma+relax+stai
+        instructions = trauma+relax
 
     else:
         raise NotImplementedError
@@ -148,6 +143,3 @@ def retrieve_relaxation(cue, length):
 
     return instructions
 
-def retrieve_stai(question_number):
-
-    return ''
