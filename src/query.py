@@ -160,7 +160,6 @@ if __name__ == "__main__":
             for item in range(len(questions)): # loop through questionnaire items
 
                 # get answer options (scramble their order independently at each questionnaire item)
-                
                     options = questions[0]["labels"]
                     optionText = ""
                     
