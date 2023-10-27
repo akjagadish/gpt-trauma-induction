@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     # parameters for formatting the prompt
 
-    if llm == "gpt3" | llm == "gpt4":
+    if llm == "gpt3" or llm == "gpt4":
         Q_ = "Q:"
         A_ = "A:"
         E_ = " "
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
             for item in range(len(questions)): # loop through questionnaire items
 
-                # get answer options (scramble their order independently at each questionnaire item)
+                    # get answer options (scramble their order independently at each questionnaire item)
                     options = questions[0]["labels"]
                     optionText = ""
                     
