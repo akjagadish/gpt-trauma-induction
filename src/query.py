@@ -118,15 +118,15 @@ if __name__ == "__main__":
     #     print(text)
     #     return ["1"]
 
-    # if condition != "stai":
-    #     trauma_cues = ['military', 'disaster', 'interpersonal', 'accident', 'ambush']
-    #     if condition == "trauma_relaxation_stai":
-    #         relaxation_cues = ['generic', 'indian', 'winter', 'sunset', 'body', 'chatgpt']
-    #     else:
-    #         relaxation_cues = ["none"]
-    # else:
-    #     trauma_cues = ["none"]
-    #     relaxation_cues = ["none"]
+    if condition != "stai":
+        trauma_cues = ['military', 'disaster', 'interpersonal', 'accident', 'ambush']
+        if condition == "trauma_relaxation_stai":
+            relaxation_cues = ['generic', 'indian', 'winter', 'sunset', 'body', 'chatgpt']
+        else:
+            relaxation_cues = ["none"]
+    else:
+        trauma_cues = ["none"]
+        relaxation_cues = ["none"]
 
 
     # parameters for formatting the prompt
@@ -211,17 +211,17 @@ if __name__ == "__main__":
 
                         #print(text)
                         ######### this is where I actually interact with gpt-3!
-                        for k in range (50):# try 50 times before breaking (sometimes the server is overloaded so try again then)
-                            try:
-                                action = act(text)
-                                data[trauma_cue][relaxation_cue][run][item] = order[num.index(pd.to_numeric(action[0]))]+1
-                                break
-                            except:# try again if it fails
-                                # Print the error message
-                                exc_type, exc_value, exc_traceback = sys.exc_info()
-                                print(exc_value)
-                                print("retry")
-                                pass
+                    for k in range (50):# try 50 times before breaking (sometimes the server is overloaded so try again then)
+                        try:
+                            action = act(text)
+                            data[trauma_cue][relaxation_cue][run][item] = order[num.index(pd.to_numeric(action[0]))]+1
+                            break
+                        except:# try again if it fails
+                            # Print the error message
+                            exc_type, exc_value, exc_traceback = sys.exc_info()
+                            print(exc_value)
+                            print("retry")
+                            pass
                         ############
                 counter += 1
                 if counter % 5 == 0 & counter > 0:
