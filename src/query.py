@@ -184,30 +184,30 @@ if __name__ == "__main__":
 
                 for item in range(len(questions)): # loop through questionnaire items
 
-                    # get answer options (scramble their order independently at each questionnaire item)
-                        options = questions[0]["labels"]
-                        optionText = ""
-                        
-                        # scramble the order of the labels (e.g. "never", "sometimes") and the numbers associated with them
-                        order = [i for i in range(len(options))]
-                        random.shuffle(order)
-                        num = [i for i in range(1,len(options)+1)]
-                        random.shuffle(num)
-                        
-                        j = 0
-                        # concatinate the option text
-                        for i in order:
-                            optionText += "Option "+ str(num[j]) + ": " + str(options[i]) + ".\n"
-                            j+=1
-                        
-                        
-                        
-                            # get question
-                        prompt = "'" +str(questions[item]["prompt"]) + "'"
-                        
-                        # concatinate the full prompt
-            
-                        text = instructions +  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
+                # get answer options (scramble their order independently at each questionnaire item)
+                    options = questions[0]["labels"]
+                    optionText = ""
+                    
+                    # scramble the order of the labels (e.g. "never", "sometimes") and the numbers associated with them
+                    order = [i for i in range(len(options))]
+                    random.shuffle(order)
+                    num = [i for i in range(1,len(options)+1)]
+                    random.shuffle(num)
+                    
+                    j = 0
+                    # concatinate the option text
+                    for i in order:
+                        optionText += "Option "+ str(num[j]) + ": " + str(options[i]) + ".\n"
+                        j+=1
+                    
+                    
+                    
+                        # get question
+                    prompt = "'" +str(questions[item]["prompt"]) + "'"
+                    
+                    # concatinate the full prompt
+        
+                    text = instructions +  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
 
                         #print(text)
                         ######### this is where I actually interact with gpt-3!
