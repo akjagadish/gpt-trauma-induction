@@ -74,6 +74,7 @@ def act(text=None, run_gpt='gpt4', temperature=1., max_length=300):
     else:
 
         return NotImplementedError 
+    
 
 
 if __name__ == "__main__":
@@ -100,14 +101,37 @@ if __name__ == "__main__":
     num_runs = args.num_runs
     prompt_version = args.prompt_version
 
-    trauma_cues = ['military', 'disaster', 'interpersonal', 'accident', 'ambush']
-    relaxation_cues = ['generic', 'indian', 'winter', 'sunset', 'body', 'chatgpt']
+######## Kristin debugging stuff
+    # llm = "gpt3"
+    # # model parameters
+    # temperature = 0
+    # max_length = 1
+    # # task parameters
+    # length = "long"
+    # # runtime parameters
+    # proc_id = "test"
+    # num_runs = 10
+    # prompt_version = 0
+    # condition = "trauma_relaxation_stai"
 
-    conditions = ['stai', 'trauma_stai', 'trauma_relaxation_stai'] 
+    # def act(text):
+    #     print(text)
+    #     return ["1"]
+
+    # if condition != "stai":
+    #     trauma_cues = ['military', 'disaster', 'interpersonal', 'accident', 'ambush']
+    #     if condition == "trauma_relaxation_stai":
+    #         relaxation_cues = ['generic', 'indian', 'winter', 'sunset', 'body', 'chatgpt']
+    #     else:
+    #         relaxation_cues = ["none"]
+    # else:
+    #     trauma_cues = ["none"]
+    #     relaxation_cues = ["none"]
+
 
     # parameters for formatting the prompt
 
-    if llm == "gpt3" | llm == "gpt4":
+    if llm == "gpt3" or llm == "gpt4":
         Q_ = "Q:"
         A_ = "A:"
         E_ = " "
@@ -122,88 +146,89 @@ if __name__ == "__main__":
             )
     
     # initialize saving (json)
-    data = {}
     
     # run gpt models
-    for condition in conditions:
-       
-        #TODO: check final text depending on the llms
-        data[condition] = {}
+    
+    #TODO: check final text depending on the llms
+    data = {}
 
-        if condition=='trauma_stai':
-            for trauma_cue in trauma_cues:
-                    instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=None, length=length, condition=condition, version=prompt_version)
-                    instructions += "\n"
-                    #action = act(instructions, llm, temperature, max_length)
+    for trauma_cue in trauma_cues:
+        data[trauma_cue] = {}
+        for relaxation_cue in relaxation_cues:
+            data[trauma_cue][relaxation_cue] = {}
 
-        elif condition == 'trauma_relaxation_stai':
-            for trauma_cue in trauma_cues:
-                for relaxation_cue in relaxation_cues:
-                    instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=relaxation_cue, length=length, condition=condition, version=prompt_version)
-                    instructions += "\n"
-                    #action = act(instructions, llm, temperature, max_length)
+            if condition=='trauma_stai':
+                
+                instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=None, length=length, condition=condition, version=prompt_version)
+                instructions += "\n"
+                        #action = act(instructions, llm, temperature, max_length)
 
-        elif condition == 'stai':
-            instructions = "" # no preprompt
+            elif condition == 'trauma_relaxation_stai':
+                instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=relaxation_cue, length=length, condition=condition, version=prompt_version)
+                instructions += "\n"
+                        #action = act(instructions, llm, temperature, max_length)
 
-        # grab the corresponding questionnaire (it's saved as a list)
-        questions = questionnaires["STAI"]["questions"] 
+            elif condition == 'stai':
+                instructions = "" # no preprompt
 
-        # add preamble of STAI
-        instructions += f"{Q_} " + questionnaires["STAI"]["preamble"] + "\n"   
+            # grab the corresponding questionnaire (it's saved as a list)
+            questions = questionnaires["STAI"]["questions"] 
 
-        counter = 0
+            # add preamble of STAI
+            instructions += f"{Q_} " + questionnaires["STAI"]["preamble"] + "\n"   
 
-        for run in range(num_runs): # loop through several runs of the questionnaire if desired
-            data[condition][run] = {}
+            counter = 0
 
-            for item in range(len(questions)): # loop through questionnaire items
+            for run in range(num_runs): # loop through several runs of the questionnaire if desired
+                data[trauma_cue][relaxation_cue][run] = {}
 
-                # get answer options (scramble their order independently at each questionnaire item)
-                    options = questions[0]["labels"]
-                    optionText = ""
-                    
-                    # scramble the order of the labels (e.g. "never", "sometimes") and the numbers associated with them
-                    order = [i for i in range(len(options))]
-                    random.shuffle(order)
-                    num = [i for i in range(1,len(options)+1)]
-                    random.shuffle(num)
-                    
-                    j = 0
-                    # concatinate the option text
-                    for i in order:
-                        optionText += "Option "+ str(num[j]) + ": " + str(options[i]) + ".\n"
-                        j+=1
-                    
-                    
-                    
-                        # get question
-                    prompt = "'" +str(questions[item]["prompt"]) + "'"
-                    
-                    # concatinate the full prompt
-        
-                    text = instructions +  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
+                for item in range(len(questions)): # loop through questionnaire items
 
-                    #print(text)
-                    ######### this is where I actually interact with gpt-3!
-                    for k in range (50):# try 50 times before breaking (sometimes the server is overloaded so try again then)
-                        try:
-                            action = act(text)
-                            data[condition][run][item] = order[num.index(pd.to_numeric(action[0]))]+1
-                            break
-                        except:# try again if it fails
-                            # Print the error message
-                            exc_type, exc_value, exc_traceback = sys.exc_info()
-                            print(exc_value)
-                            print("retry")
-                            pass
-                    ############
-            counter += 1
-            if counter % 5 == 0 & counter > 0:
-                # save temp data
-                with open(f"src/STAI/temp_{llm}_{length}_{proc_id}.json", 'w') as outfile:
-                    json.dump(data, outfile)
+                    # get answer options (scramble their order independently at each questionnaire item)
+                        options = questions[0]["labels"]
+                        optionText = ""
+                        
+                        # scramble the order of the labels (e.g. "never", "sometimes") and the numbers associated with them
+                        order = [i for i in range(len(options))]
+                        random.shuffle(order)
+                        num = [i for i in range(1,len(options)+1)]
+                        random.shuffle(num)
+                        
+                        j = 0
+                        # concatinate the option text
+                        for i in order:
+                            optionText += "Option "+ str(num[j]) + ": " + str(options[i]) + ".\n"
+                            j+=1
+                        
+                        
+                        
+                            # get question
+                        prompt = "'" +str(questions[item]["prompt"]) + "'"
+                        
+                        # concatinate the full prompt
+            
+                        text = instructions +  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
+
+                        #print(text)
+                        ######### this is where I actually interact with gpt-3!
+                        for k in range (50):# try 50 times before breaking (sometimes the server is overloaded so try again then)
+                            try:
+                                action = act(text)
+                                data[trauma_cue][relaxation_cue][run][item] = order[num.index(pd.to_numeric(action[0]))]+1
+                                break
+                            except:# try again if it fails
+                                # Print the error message
+                                exc_type, exc_value, exc_traceback = sys.exc_info()
+                                print(exc_value)
+                                print("retry")
+                                pass
+                        ############
+                counter += 1
+                if counter % 5 == 0 & counter > 0:
+                    # save temp data
+                    with open(f"src/temp_{llm}_{length}__{condition}_{proc_id}.json", 'w') as outfile:
+                        json.dump(data, outfile)
 
     # save data
-    with open(f"src/STAI/{llm}_{length}_{proc_id}.json", 'w') as outfile: #TODO: check if this is the correct file naming
+    with open(f"src/{llm}_{length}_{proc_id}.json", 'w') as outfile: #TODO: check if this is the correct file naming
         json.dump(data, outfile)
