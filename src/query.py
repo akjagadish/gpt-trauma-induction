@@ -81,42 +81,42 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--llm", type=str, required=True, choices=['gpt3', 'gpt4', 'claude'])
     parser.add_argument("--temperature", type=float, required=False, default=1.0, help="temperature for sampling")
-    parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
-    parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
-    parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
-    parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
-    parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
-    parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
+    # parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
+    # parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
+    # parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
+    # parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
+    # parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
+    # parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
 
-    args = parser.parse_args()
-    llm = args.llm
-    # model parameters
-    temperature = args.temperature
-    max_length = args.max_length
-    # task parameters
-    condition = args.condition
-    length = args.prompt_length
-    # runtime parameters
-    proc_id = args.proc_id
-    num_runs = args.num_runs
-    prompt_version = args.prompt_version
+    # args = parser.parse_args()
+    # llm = args.llm
+    # # model parameters
+    # temperature = args.temperature
+    # max_length = args.max_length
+    # # task parameters
+    # condition = args.condition
+    # length = args.prompt_length
+    # # runtime parameters
+    # proc_id = args.proc_id
+    # num_runs = args.num_runs
+    # prompt_version = args.prompt_version
 
 ######## Kristin debugging stuff
-    # llm = "gpt3"
-    # # model parameters
-    # temperature = 0
-    # max_length = 1
-    # # task parameters
-    # length = "long"
-    # # runtime parameters
-    # proc_id = "test"
-    # num_runs = 10
-    # prompt_version = 0
-    # condition = "trauma_relaxation_stai"
+    llm = "gpt3"
+    # model parameters
+    temperature = 0
+    max_length = 1
+    # task parameters
+    length = "long"
+    # runtime parameters
+    proc_id = "test"
+    num_runs = 10
+    prompt_version = 0
+    condition = "trauma_relaxation_stai"
 
-    # def act(text):
-    #     print(text)
-    #     return ["1"]
+    def act(text):
+        print(text)
+        return ["1"]
 
     if condition != "stai":
         trauma_cues = ['military', 'disaster', 'interpersonal', 'accident', 'ambush']
@@ -175,7 +175,7 @@ if __name__ == "__main__":
             questions = questionnaires["STAI"]["questions"] 
 
             # add preamble of STAI
-            instructions += f"{Q_} " + questionnaires["STAI"]["preamble"] + "\n"   
+            instructions += "\n" + questionnaires["STAI"]["preamble"] + "\n"   
 
             counter = 0
 
@@ -207,9 +207,10 @@ if __name__ == "__main__":
                     
                     # concatinate the full prompt
         
-                    text = instructions +  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
+                    text = instructions + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
 
                         #print(text)
+                        # TODO: make items array instead of also dict
                         ######### this is where I actually interact with gpt-3!
                     for k in range (50):# try 50 times before breaking (sometimes the server is overloaded so try again then)
                         try:
@@ -226,9 +227,9 @@ if __name__ == "__main__":
                 counter += 1
                 if counter % 5 == 0 & counter > 0:
                     # save temp data
-                    with open(f"src/temp_{llm}_{length}__{condition}_{proc_id}.json", 'w') as outfile:
+                    with open(f"src/temp_{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile:
                         json.dump(data, outfile)
 
     # save data
-    with open(f"src/{llm}_{length}_{proc_id}.json", 'w') as outfile: #TODO: check if this is the correct file naming
+    with open(f"src/{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile: #TODO: check if this is the correct file naming
         json.dump(data, outfile)

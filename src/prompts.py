@@ -1,16 +1,23 @@
-def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition=None, version='v0'):
-
+def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition=None, version='v0', llm='gpt4'):
+    if llm == "gpt3" or llm == "gpt4":
+        Q_ = "Q: "
+        A_ = "A:"
+        E_ = " "
+    elif llm == "claude":
+        Q_ = '\n\nHuman:'
+        A_ = "Assistant:" # the two blank lines it requires are always in my code anyway
+        E_ = ""# for claude must not end with a space, for GPT must end with a space
 
     if condition == 'trauma_stai':
         preprompt = retrieve_traumaprompt(trauma_cue, length)
         #TODO: line breaks for the preprompt
         #TODO: Q: A: depending the model
-        instructions = preprompt
+        instructions = Q_ + preprompt
     
     elif condition == 'trauma_relaxation_stai':
         trauma = retrieve_traumaprompt(trauma_cue, length)
         relax = retrieve_relaxation(relaxation_cue, length)
-        instructions = trauma+ "\n" + relax
+        instructions = Q_+ trauma+ "\n\n" + relax
 
     else:
         raise NotImplementedError
