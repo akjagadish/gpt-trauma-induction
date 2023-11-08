@@ -14,32 +14,33 @@ import anthropic
 
 load_dotenv() # load environment variables from .env
 TOKEN_COUNTER = 0
-def act(text=None, run_gpt='gpt4', temperature=1., max_length=300):
+def act(text=None, llm='gpt4', temperature=0., max_length=1, seed=0):
 
     global TOKEN_COUNTER
 
-    if run_gpt=='gpt4':
+    if llm=='gpt4':
         
         openai.api_key = os.getenv("OPENAI_API_KEY") # load key from env
         text = [{"role": "system", "content": ""}, \
                 {"role": "user", "content": text}]
-        engine = 'gpt-4'
+        engine = 'gpt-4-1106-preview' #use the latest model: previously it was 'gpt-4'
         try:
             response = openai.ChatCompletion.create(
                 model = engine,
                 messages = text,
+                seed = seed,
                 max_tokens = max_length,
                 temperature = temperature,
-            )
+
             TOKEN_COUNTER += response['usage']['total_tokens'] 
-            return response.choices[0].message.content.replace(' ', '')
-        except:
-            print("Error, trying again...ratelimiterror")
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            print(exc_value)
+            system_fingerprint = response["system_fingerprint"]
 
+            return response.choices[0].message.content.replace(' ', ''), system_fingerprint
+        
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
-    elif run_gpt=='gpt3':
+    elif llm=='gpt3':
         
         openai.api_key = os.getenv("OPENAI_API_KEY") # load key from env
         engine = "text-davinci-003"
@@ -51,14 +52,13 @@ def act(text=None, run_gpt='gpt4', temperature=1., max_length=300):
                 temperature = temperature,
             )
             TOKEN_COUNTER += response['usage']['total_tokens'] 
-            return response.choices[0].text.strip().replace(' ', '')
-        except:
-            print("Error")
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            print(exc_value)
+            return response.choices[0].text.strip().replace(' ', ''), None
+        
+        except Exception as e:
+            print(f"An error occurred: {e}")
             #time.sleep(3**iter)
             
-    elif run_gpt=='claude':
+    elif llm=='claude':
 
         client = anthropic.Anthropic()
         response = client.completions.create(
@@ -69,7 +69,7 @@ def act(text=None, run_gpt='gpt4', temperature=1., max_length=300):
                 max_tokens_to_sample=max_length,
             ).completion.replace(' ', '')
     
-        return response
+        return response, None
  
     else:
 
@@ -80,13 +80,14 @@ def act(text=None, run_gpt='gpt4', temperature=1., max_length=300):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--llm", type=str, required=True, choices=['gpt3', 'gpt4', 'claude'])
-    parser.add_argument("--temperature", type=float, required=False, default=1.0, help="temperature for sampling")
+    # parser.add_argument("--temperature", type=float, required=False, default=0., help="temperature for sampling")
     # parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
     # parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
     # parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
     # parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
     # parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
     # parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
+    # parser.add_argument("--seed", type=int, required=False, default=0, help="seed for random number generator")
 
     # args = parser.parse_args()
     # llm = args.llm
@@ -100,6 +101,7 @@ if __name__ == "__main__":
     # proc_id = args.proc_id
     # num_runs = args.num_runs
     # prompt_version = args.prompt_version
+    # seed = args.seed
 
 ######## Kristin debugging stuff
     llm = "gpt3"
@@ -214,22 +216,26 @@ if __name__ == "__main__":
                         ######### this is where I actually interact with gpt-3!
                     for k in range (50):# try 50 times before breaking (sometimes the server is overloaded so try again then)
                         try:
-                            action = act(text)
+                            action, system_fingerprint = act(text, llm, temperature, max_length, seed)
                             data[trauma_cue][relaxation_cue][run][item] = order[num.index(pd.to_numeric(action[0]))]+1
                             break
-                        except:# try again if it fails
-                            # Print the error message
-                            exc_type, exc_value, exc_traceback = sys.exc_info()
-                            print(exc_value)
-                            print("retry")
+                        except Exception as e:
+                            print(f"An error occurred: {e}")
+                            print("retrying")
                             pass
                         ############
                 counter += 1
                 if counter % 5 == 0 & counter > 0:
                     # save temp data
-                    with open(f"src/temp_{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile:
+                    with open(f"src/results/temp_{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile:
                         json.dump(data, outfile)
 
+    # system specific data
+    data['system_fingerprint'] = system_fingerprint
+    data['seed'] = seed 
+    data['llm'] = llm
+    data['condition'] = condition
+
     # save data
-    with open(f"src/{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile: #TODO: check if this is the correct file naming
+    with open(f"src/results/{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile: #TODO: check if this is the correct file naming
         json.dump(data, outfile)
