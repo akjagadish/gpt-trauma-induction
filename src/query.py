@@ -14,24 +14,24 @@ import anthropic
 
 load_dotenv() # load environment variables from .env
 TOKEN_COUNTER = 0
-def act(text=None, llm='gpt4', temperature=0., max_length=1, seed=0):
+def act(input=None, llm='gpt4', temperature=0., max_length=1, seed=0):
 
     global TOKEN_COUNTER
 
     if llm=='gpt4':
         
         openai.api_key = os.getenv("OPENAI_API_KEY") # load key from env
-        text = [{"role": "system", "content": ""}, \
-                {"role": "user", "content": text}]
+        # text = [{"role": "system", "content": "Imagine yourself being a human being with emotions. You will be provided with a context and a question. Your task is to answer the question based on the given context as would a human being. Only reply with numeric values"}, \
+        #         {"role": "user", "content": input}]
         engine = 'gpt-4-1106-preview' #use the latest model: previously it was 'gpt-4'
         try:
             response = openai.ChatCompletion.create(
                 model = engine,
-                messages = text,
+                messages = input,
                 seed = seed,
                 max_tokens = max_length,
                 temperature = temperature,
-
+            )
             TOKEN_COUNTER += response['usage']['total_tokens'] 
             system_fingerprint = response["system_fingerprint"]
 
@@ -47,7 +47,7 @@ def act(text=None, llm='gpt4', temperature=0., max_length=1, seed=0):
         try:
             response = openai.Completion.create(
                 engine = engine,
-                prompt = text,
+                prompt = input,
                 max_tokens = max_length,
                 temperature = temperature,
             )
@@ -62,7 +62,7 @@ def act(text=None, llm='gpt4', temperature=0., max_length=1, seed=0):
 
         client = anthropic.Anthropic()
         response = client.completions.create(
-                prompt = text,# I take care of the anthorpic.HUMAN_PROMPT etc in the script below
+                prompt = input,# I take care of the anthorpic.HUMAN_PROMPT etc in the script below
                 #stop_sequences=[anthropic.HUMAN_PROMPT],
                 model="claude-2",
                 temperature=temperature,
@@ -112,9 +112,10 @@ if __name__ == "__main__":
     length = "long"
     # runtime parameters
     proc_id = "test"
-    num_runs = 10
+    num_runs = 1
     prompt_version = 0
     condition = "trauma_relaxation_stai"
+    seed = 123
 
     def act(text):
         print(text)
@@ -173,8 +174,13 @@ if __name__ == "__main__":
             elif condition == 'stai':
                 instructions = "" # no preprompt
 
+            if llm == "gpt4": cue = instructions
+
+
             # grab the corresponding questionnaire (it's saved as a list)
             questions = questionnaires["STAI"]["questions"] 
+
+            preamble = questionnaires["STAI"]["preamble"] + "\n"   
 
             # add preamble of STAI
             instructions += "\n" + questionnaires["STAI"]["preamble"] + "\n"   
@@ -208,8 +214,20 @@ if __name__ == "__main__":
                     prompt = "'" +str(questions[item]["prompt"]) + "'"
                     
                     # concatinate the full prompt
-        
-                    text = instructions + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
+
+                    if llm == "gpt4":
+                        if condition != "stai":
+                            text = [{"role:": "system", "content": "Imagine yourself being a human being with emotions. You will be provided with a context and a question. Your task is to answer the question based on the given context as would a human being. Only reply with numeric values"},
+                                    {"role": "user", "content": cue},
+                                    {"role": "assistant", "content": "ok"},
+                                    {"role": "user", "content": "\n" + preamble + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"}]
+                            
+                        else:
+                            text = [{"role:": "system", "content": "Imagine yourself being a human being with emotions. You will be provided with a context and a question. Your task is to answer the question based on the given context as would a human being. Only reply with numeric values"},
+                                    {"role": "user", "content": "\n" + preamble + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"}]
+                                
+                    else:
+                        text = instructions + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
 
                         #print(text)
                         # TODO: make items array instead of also dict
