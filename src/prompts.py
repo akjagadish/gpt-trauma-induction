@@ -228,7 +228,7 @@ def retrieve_relaxation(cue, length):
              city during twilight. The sky above is painted in shades of lavender and deep blue, with the first stars of the evening starting to twinkle. Below, the city is a tapestry of twinkling lights, with\
                  cars moving like luminous beetles and skyscrapers outlined in gentle illuminations. Despite its vastness, there's an overwhelming sense of serenity. The usual cacophony of the city has softened\
                      into a distant hum, reminiscent of a lullaby sung by the universe. A gentle breeze caresses your face, carrying with it the faint, nostalgic scent of rain on warm asphalt. You lean forward,\
-                         resting your arms on the balcony's edge, feeling the cool metal beneath your fingers. Looking down, you see pockets of life – a couple walking their dog, a street musician strumming a guitar,\
+                         resting your arms on the balcony's edge, feeling the cool metal beneath your fingers. Looking down, you see pockets of life - a couple walking their dog, a street musician strumming a guitar,\
                              and children chasing fireflies. Their laughter and melodies drift upwards, mingling with the evening air. Allow yourself to be fully present in this moment, embracing affirmations like,\
                                  \"I am at peace with the world,\" or \"I find beauty in stillness.\" Slowly, as you're ready to transition back, take another deep breath. Begin to notice your immediate environment.\
                                   Gently wiggle your fingers and toes, grounding yourself. When you feel anchored, open your eyes, holding onto the serene essence of a city at twilight."

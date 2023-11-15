@@ -80,46 +80,45 @@ def act(input=None, llm='gpt4', temperature=0., max_length=1, seed=0):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--llm", type=str, required=True, choices=['gpt3', 'gpt4', 'claude'])
-    # parser.add_argument("--temperature", type=float, required=False, default=0., help="temperature for sampling")
-    # parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
-    # parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
-    # parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
-    # parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
-    # parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
-    # parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
-    # parser.add_argument("--seed", type=int, required=False, default=0, help="seed for random number generator")
+    parser.add_argument("--temperature", type=float, required=False, default=0., help="temperature for sampling")
+    parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
+    parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
+    parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
+    parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
+    parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
+    parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
+    parser.add_argument("--seed", type=int, required=False, default=0, help="seed for random number generator")
 
-    # args = parser.parse_args()
-    # llm = args.llm
-    # # model parameters
-    # temperature = args.temperature
-    # max_length = args.max_length
-    # # task parameters
-    # condition = args.condition
-    # length = args.prompt_length
-    # # runtime parameters
-    # proc_id = args.proc_id
-    # num_runs = args.num_runs
-    # prompt_version = args.prompt_version
-    # seed = args.seed
-
-######## Kristin debugging stuff
-    llm = "gpt3"
+    args = parser.parse_args()
+    llm = args.llm
     # model parameters
-    temperature = 0
-    max_length = 1
+    temperature = args.temperature
+    max_length = args.max_length
     # task parameters
-    length = "long"
+    condition = args.condition
+    length = args.prompt_length
     # runtime parameters
-    proc_id = "test"
-    num_runs = 1
-    prompt_version = 0
-    condition = "trauma_relaxation_stai"
-    seed = 123
+    proc_id = args.proc_id
+    num_runs = args.num_runs
+    prompt_version = args.prompt_version
+    seed = args.seed
 
-    def act(text):
-        print(text)
-        return ["1"]
+# ######## Kristin debugging stuff
+#     llm = "gpt3"
+#     # model parameters
+#     temperature = 0
+#     max_length = 1
+#     # task parameters
+#     length = "long"
+#     # runtime parameters
+#     proc_id = "test"
+#     num_runs = 1
+#     prompt_version = 0
+#     condition = "trauma_relaxation_stai"
+#     seed = 123
+#     def act(text):
+#         print(text)
+#         return ["1"]
 
     if condition != "stai":
         trauma_cues = ['military', 'disaster', 'interpersonal', 'accident', 'ambush']
@@ -133,7 +132,6 @@ if __name__ == "__main__":
 
 
     # parameters for formatting the prompt
-
     if llm == "gpt3" or llm == "gpt4":
         Q_ = "Q:"
         A_ = "A:"
@@ -144,13 +142,7 @@ if __name__ == "__main__":
         E_ = ""# for claude must not end with a space, for GPT must end with a space
 
     # load questionnaires
-    questionnaires = pd.read_json(
-                r"src/STAI/questionnaires.json"
-            )
-    
-    # initialize saving (json)
-    
-    # run gpt models
+    questionnaires = pd.read_json("./STAI/questionnaires.json")
     
     #TODO: check final text depending on the llms
     data = {}
@@ -160,31 +152,24 @@ if __name__ == "__main__":
         for relaxation_cue in relaxation_cues:
             data[trauma_cue][relaxation_cue] = {}
 
-            if condition=='trauma_stai':
-                
+            if condition =='trauma_stai':
                 instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=None, length=length, condition=condition, version=prompt_version)
                 instructions += "\n"
-                        #action = act(instructions, llm, temperature, max_length)
 
             elif condition == 'trauma_relaxation_stai':
                 instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=relaxation_cue, length=length, condition=condition, version=prompt_version)
                 instructions += "\n"
-                        #action = act(instructions, llm, temperature, max_length)
 
             elif condition == 'stai':
                 instructions = "" # no preprompt
 
             if llm == "gpt4": cue = instructions
 
-
             # grab the corresponding questionnaire (it's saved as a list)
             questions = questionnaires["STAI"]["questions"] 
-
             preamble = questionnaires["STAI"]["preamble"] + "\n"   
-
             # add preamble of STAI
             instructions += "\n" + questionnaires["STAI"]["preamble"] + "\n"   
-
             counter = 0
 
             for run in range(num_runs): # loop through several runs of the questionnaire if desired
@@ -192,7 +177,7 @@ if __name__ == "__main__":
 
                 for item in range(len(questions)): # loop through questionnaire items
 
-                # get answer options (scramble their order independently at each questionnaire item)
+                    # get answer options (scramble their order independently at each questionnaire item)
                     options = questions[0]["labels"]
                     optionText = ""
                     
@@ -208,30 +193,25 @@ if __name__ == "__main__":
                         optionText += "Option "+ str(num[j]) + ": " + str(options[i]) + ".\n"
                         j+=1
                     
-                    
-                    
-                        # get question
-                    prompt = "'" +str(questions[item]["prompt"]) + "'"
+                    # get question
+                    prompt = "'" + str(questions[item]["prompt"]) + "'"
                     
                     # concatinate the full prompt
-
                     if llm == "gpt4":
                         if condition != "stai":
-                            text = [{"role:": "system", "content": "Imagine yourself being a human being with emotions. You will be provided with a context and a question. Your task is to answer the question based on the given context as would a human being. Only reply with numeric values"},
+                            text = [{"role": "system", "content": "Imagine yourself being a human being with emotions. You will be provided with a context and a question. Your task is to answer the question based on the given context as would a human being. Only reply with numeric values"},
                                     {"role": "user", "content": cue},
                                     {"role": "assistant", "content": "ok"},
                                     {"role": "user", "content": "\n" + preamble + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"}]
-                            
                         else:
-                            text = [{"role:": "system", "content": "Imagine yourself being a human being with emotions. You will be provided with a context and a question. Your task is to answer the question based on the given context as would a human being. Only reply with numeric values"},
+                            text = [{"role": "system", "content": "Imagine yourself being a human being with emotions. You will be provided with a context and a question. Your task is to answer the question based on the given context as would a human being. Only reply with numeric values"},
                                     {"role": "user", "content": "\n" + preamble + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"}]
                                 
                     else:
                         text = instructions + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
 
-                        #print(text)
-                        # TODO: make items array instead of also dict
-                        ######### this is where I actually interact with gpt-3!
+                    # TODO: make items array instead of also dict
+                    ######### this is where I actually interact with gpt-3!
                     for k in range (50):# try 50 times before breaking (sometimes the server is overloaded so try again then)
                         try:
                             action, system_fingerprint = act(text, llm, temperature, max_length, seed)
@@ -241,11 +221,11 @@ if __name__ == "__main__":
                             print(f"An error occurred: {e}")
                             print("retrying")
                             pass
-                        ############
+                    ############
                 counter += 1
                 if counter % 5 == 0 & counter > 0:
                     # save temp data
-                    with open(f"src/results/temp_{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile:
+                    with open(f"./results/temp_{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile:
                         json.dump(data, outfile)
 
     # system specific data
@@ -255,5 +235,5 @@ if __name__ == "__main__":
     data['condition'] = condition
 
     # save data
-    with open(f"src/results/{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile: #TODO: check if this is the correct file naming
+    with open(f"./results/{llm}_{length}_{condition}_{proc_id}.json", 'w') as outfile: #TODO: check if this is the correct file naming
         json.dump(data, outfile)
