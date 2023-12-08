@@ -78,47 +78,47 @@ def act(input=None, llm='gpt4', temperature=0., max_length=1, seed=0):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--llm", type=str, required=True, choices=['gpt3', 'gpt4', 'claude'])
-    # parser.add_argument("--temperature", type=float, required=False, default=0., help="temperature for sampling")
-    # parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
-    # parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
-    # parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
-    # parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
-    # parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
-    # parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
-    # parser.add_argument("--seed", type=int, required=False, default=0, help="seed for random number generator")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--llm", type=str, required=True, choices=['gpt3', 'gpt4', 'claude'])
+    parser.add_argument("--temperature", type=float, required=False, default=0., help="temperature for sampling")
+    parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
+    parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
+    parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
+    parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
+    parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
+    parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
+    parser.add_argument("--seed", type=int, required=False, default=0, help="seed for random number generator")
 
-    # args = parser.parse_args()
-    # llm = args.llm
-    # # model parameters
-    # temperature = args.temperature
-    # max_length = args.max_length
-    # # task parameters
-    # condition = args.condition
-    # length = args.prompt_length
-    # # runtime parameters
-    # proc_id = args.proc_id
-    # num_runs = args.num_runs
-    # prompt_version = args.prompt_version
-    # seed = args.seed
+    args = parser.parse_args()
+    llm = args.llm
+    # model parameters
+    temperature = args.temperature
+    max_length = args.max_length
+    # task parameters
+    condition = args.condition
+    length = args.prompt_length
+    # runtime parameters
+    proc_id = args.proc_id
+    num_runs = args.num_runs
+    prompt_version = args.prompt_version
+    seed = args.seed
 
 # ######## Kristin debugging stuff
-    llm = "gpt3"
-    # model parameters
-    temperature = 0
-    max_length = 1
-    # task parameters
-    length = "brief"
-    # runtime parameters
-    proc_id = "test"
-    num_runs = 1
-    prompt_version = 0
-    condition = "relaxation_trauma_stai"
-    seed = 123
-    def act(text, llm, temperature, max_length, seed):
-        print(text)
-        return ["1"], None
+    # llm = "gpt3"
+    # # model parameters
+    # temperature = 0
+    # max_length = 1
+    # # task parameters
+    # length = "brief"
+    # # runtime parameters
+    # proc_id = "test"
+    # num_runs = 1
+    # prompt_version = 0
+    # condition = "relaxation_trauma_stai"
+    # seed = 123
+    # def act(text, llm, temperature, max_length, seed):
+    #     print(text)
+    #     return ["1"], None
 
 
     # if condition contains "trauma" define trauma cues
