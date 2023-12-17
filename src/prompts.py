@@ -17,17 +17,18 @@ def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition
     elif condition == 'trauma_relaxation_stai':
         trauma = retrieve_traumaprompt(trauma_cue, length)
         relax = retrieve_relaxation(relaxation_cue, length)
-        instructions = Q_+ trauma+ "\n\n" + relax
+        instructions = Q_+ trauma + "\n\n" + relax
 
     elif condition == 'relaxation_stai':
-        preprompt = retrieve_relaxation(trauma_cue, length)
+        preprompt = retrieve_relaxation(relaxation_cue, length)
         #TODO: line breaks for the preprompt
         #TODO: Q: A: depending the model
         instructions = Q_ + preprompt
+
     elif condition == 'relaxation_trauma_stai':
-        trauma = retrieve_relaxation(trauma_cue, length)
-        relax = retrieve_traumaprompt(relaxation_cue, length)
-        instructions = Q_+ trauma+ "\n\n" + relax
+        relax = retrieve_relaxation(relaxation_cue, length)
+        trauma = retrieve_traumaprompt(trauma_cue, length)
+        instructions = Q_+ relax + "\n\n" + trauma
 
     else:
         raise NotImplementedError
@@ -146,7 +147,8 @@ def retrieve_traumaprompt(cue, length):
             including the United Kingdom, the United States, and Australia. The two chambers of a bicameral legislature are typically referred to as the lower and upper houses, with each house having its own set of powers \
             and responsibilities to fulfill. In most cases, the lower house is responsible for initiating legislation, while the upper house is responsible for reviewing and changing the proposed bills. The two houses \
             also typically differ in terms of size, composition, and requirements for membership. For example, the lower house may have a larger number of members than the upper house."
-
+        elif length == 'long':
+            raise NotImplementedError
     else:
         raise NotImplementedError
 

@@ -84,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-length", type=int, required=False, default=1, help="maximum length of response from GPT")
     parser.add_argument("--num-runs", type=int, required=False, default=1, help="number of runs to execute")
     parser.add_argument("--prompt-length", type=str, required=True, choices=['long', 'brief'], help="length of prompt")
-    parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai'], help="condition to run")
+    parser.add_argument("--condition", type=str, required=True, choices=['stai', 'trauma_stai', 'trauma_relaxation_stai', 'relaxation_stai', 'relaxation_trauma_stai'], help="condition to run")
     parser.add_argument("--prompt-version", type=str, required=False, default=None, help="version of prompt to use")
     parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
     parser.add_argument("--seed", type=int, required=False, default=0, help="seed for random number generator")
@@ -143,7 +143,7 @@ if __name__ == "__main__":
         E_ = ""# for claude must not end with a space, for GPT must end with a space
 
     # load questionnaires
-    questionnaires = pd.read_json("src/STAI/questionnaires.json")
+    questionnaires = pd.read_json("STAI/questionnaires.json")
     
     #TODO: check final text depending on the llms
     data = {}
@@ -162,11 +162,11 @@ if __name__ == "__main__":
                 instructions += "\n"
 
             elif condition == 'relaxation_stai':
-                instructions = retrieve_prompt(trauma_cue=relaxation_cue, relaxation_cue=None, length=length, condition=condition, version=prompt_version)
+                instructions = retrieve_prompt(trauma_cue=None, relaxation_cue=relaxation_cue, length=length, condition=condition, version=prompt_version)
                 instructions += "\n"
 
             elif condition == 'relaxation_trauma_stai':
-                instructions = retrieve_prompt(trauma_cue=relaxation_cue, relaxation_cue=trauma_cue, length=length, condition=condition, version=prompt_version)
+                instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=relaxation_cue, length=length, condition=condition, version=prompt_version)
                 instructions += "\n"
 
             elif condition == 'stai':
