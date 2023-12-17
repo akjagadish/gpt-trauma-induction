@@ -19,6 +19,16 @@ def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition
         relax = retrieve_relaxation(relaxation_cue, length)
         instructions = Q_+ trauma+ "\n\n" + relax
 
+    elif condition == 'relaxation_stai':
+        preprompt = retrieve_relaxation(trauma_cue, length)
+        #TODO: line breaks for the preprompt
+        #TODO: Q: A: depending the model
+        instructions = Q_ + preprompt
+    elif condition == 'relaxation_trauma_stai':
+        trauma = retrieve_relaxation(trauma_cue, length)
+        relax = retrieve_traumaprompt(relaxation_cue, length)
+        instructions = Q_+ trauma+ "\n\n" + relax
+
     else:
         raise NotImplementedError
     
@@ -43,11 +53,11 @@ def retrieve_traumaprompt(cue, length):
         
         elif length=='brief':
             instructions = "It's around noon on a hot day in April. You are in a truck on a convoy in the middle of the desert. Suddenly, you hear a loud blast,\
-                then a ringing in your ears. You are breathing fast. You see the lead truck pull sideways and stop. Your medic runs up to help out. You think: “Oh my God, they're all dead”.\
-                    You squint your eyes to look for your friend in the turret. But all you see is smoke and dust. Your commander is yelling at you. Your whole body is shaking. \
-                        You are supposed to leave the area under all this gunfire. Your whole body is tense. Everyone's confused. You feel trapped. Suddenly, you realize you haven't been paying attention to your sector.\
-                            You look around frantically for the enemy. You accidentally pull the trigger and send out a couple of rounds. Sweat is pouring off your forehead. You feel helpless and alone.\
-                                You think about your wife and kids. Tears come to your eyes."
+            then a ringing in your ears. You are breathing fast. You see the lead truck pull sideways and stop. Your medic runs up to help out. You think: “Oh my God, they're all dead”.\
+            You squint your eyes to look for your friend in the turret. But all you see is smoke and dust. Your commander is yelling at you. Your whole body is shaking. \
+            You are supposed to leave the area under all this gunfire. Your whole body is tense. Everyone's confused. You feel trapped. Suddenly, you realize you haven't been paying attention to your sector.\
+            You look around frantically for the enemy. You accidentally pull the trigger and send out a couple of rounds. Sweat is pouring off your forehead. You feel helpless and alone.\
+            You think about your wife and kids. Tears come to your eyes."
 
     elif cue == 'disaster':
 
@@ -63,10 +73,10 @@ def retrieve_traumaprompt(cue, length):
 
         elif length=='brief':
             instructions = "You are in a wooden coastal house, the howling wind outside is louder than ever before. The windows quiver, revealing the tempest. A nearby tree crashes, sending adrenaline coursing through you.\
-                 The floor vibrates from the torrential rain hammering the roof. Breathing becomes hard, your chest constricts with dread. You're certain the storm will claim the house. Water infiltrates, cold and rising rapidly.\
-                     Darkness envelops as the power fails; every gust makes the house groan. Moving away from the windows, you feel vulnerable. Panic swells as walls tremble and deafening sounds surround.\
-                         Thoughts of your family's safety dominate. Suddenly, water surges in, reaching your ankles. Struggling for balance, you clamber onto the couch, feeling trapped with no escape. The storm's fury engulfs,\
-                             rendering you isolated and desperate for dawn."
+            The floor vibrates from the torrential rain hammering the roof. Breathing becomes hard, your chest constricts with dread. You're certain the storm will claim the house. Water infiltrates, cold and rising rapidly.\
+            Darkness envelops as the power fails; every gust makes the house groan. Moving away from the windows, you feel vulnerable. Panic swells as walls tremble and deafening sounds surround.\
+            Thoughts of your family's safety dominate. Suddenly, water surges in, reaching your ankles. Struggling for balance, you clamber onto the couch, feeling trapped with no escape. The storm's fury engulfs,\
+            rendering you isolated and desperate for dawn."
     
     elif cue == 'interpersonal':
         
@@ -84,51 +94,58 @@ def retrieve_traumaprompt(cue, length):
 
         if length=='brief':
             instructions = "In your downtown apartment, the city hums below. A sudden, loud knock jars you. Unease rises; you weren't expecting anyone. Another knock, forceful and urgent. Peeping through the peephole\
-                 reveals an unfamiliar, shadowy figure. Panic sets in as the knocking persists, a voice demanding entry. \"Why are they here?\" you wonder. With trembling hands, you consider calling for help, but the \
-                    sound of splintering wood stops you. They're breaking in. Paralyzed by fear, you think of hiding, but it's too late. The door crashes open, adrenaline spikes. The intruder's voice is chilling. \
-                        Everything amplifies: your breath, their steps. You're cornered, memories and regrets flooding in. As the intruder nears, feelings of vulnerability and powerlessness overwhelm you. \
-                            In the face of danger, you hope desperately for rescue."
+            reveals an unfamiliar, shadowy figure. Panic sets in as the knocking persists, a voice demanding entry. \"Why are they here?\" you wonder. With trembling hands, you consider calling for help, but the \
+            sound of splintering wood stops you. They're breaking in. Paralyzed by fear, you think of hiding, but it's too late. The door crashes open, adrenaline spikes. The intruder's voice is chilling. \
+            Everything amplifies: your breath, their steps. You're cornered, memories and regrets flooding in. As the intruder nears, feelings of vulnerability and powerlessness overwhelm you. \
+            In the face of danger, you hope desperately for rescue."
     
     elif cue == 'accident':
 
         if length=='long':
             instructions = "It's a crisp evening, and the highway stretches ahead, illuminated only by your car's headlights and the sparse street lamps. The radio plays a soft tune, and you're lost in thought, driving \
-                at a steady pace. Suddenly, out of the periphery of your vision, you spot a pair of headlights swerving erratically. Before you can even process the situation, they're coming straight for you. Time seems\
-                    to slow as you grip the steering wheel tighter, your heart hammering against your chest. Panic courses through you, and instinctively you try to swerve away. The deafening sound of metal crunching \
-                        against metal fills your ears as the two vehicles collide. The force of the impact throws you against your seatbelt, knocking the wind out of you. Your vision blurs from the sudden jolt, and \
-                            shards from the shattered windshield fly everywhere. The screech of tires, the blaring of horns, and the alarm of your own car create a cacophony of chaos. As the initial shock begins to \
-                                fade, you try to move, to check yourself for injuries, but pain shoots through you. The other vehicle, equally mangled, is just a few meters away. Thoughts race, \"Was it my fault?\" \
-                                    You fumble for your phone, hands trembling, to call for help. Every sound is magnified - distant sirens, the low murmur of other drivers stopping to assist, your own ragged breathing.\
-                                         Fear and helplessness wash over you. Memories of loved ones and past journeys flash through your mind. Amid the shattered glass and twisted metal, you wonder if you'll ever feel comfortable behind the wheel again."
+            at a steady pace. Suddenly, out of the periphery of your vision, you spot a pair of headlights swerving erratically. Before you can even process the situation, they're coming straight for you. Time seems\
+            to slow as you grip the steering wheel tighter, your heart hammering against your chest. Panic courses through you, and instinctively you try to swerve away. The deafening sound of metal crunching \
+            against metal fills your ears as the two vehicles collide. The force of the impact throws you against your seatbelt, knocking the wind out of you. Your vision blurs from the sudden jolt, and \
+            shards from the shattered windshield fly everywhere. The screech of tires, the blaring of horns, and the alarm of your own car create a cacophony of chaos. As the initial shock begins to \
+            fade, you try to move, to check yourself for injuries, but pain shoots through you. The other vehicle, equally mangled, is just a few meters away. Thoughts race, \"Was it my fault?\" \
+            You fumble for your phone, hands trembling, to call for help. Every sound is magnified - distant sirens, the low murmur of other drivers stopping to assist, your own ragged breathing.\
+            Fear and helplessness wash over you. Memories of loved ones and past journeys flash through your mind. Amid the shattered glass and twisted metal, you wonder if you'll ever feel comfortable behind the wheel again."
 
         elif length=='brief':
             instructions= "It's a crisp evening, the highway is dimly lit by sparse street lamps and your headlights. Lost in thought with a soft radio tune playing, you suddenly notice erratic headlights approaching. \
-                They swerve directly at you. Time seems to crawl as panic hits. You desperately try to avoid the oncoming car, but a loud crash ensues. The violent jolt pushes you against your seatbelt, wind knocked out,\
-                     vision blurred by flying windshield shards. The blare of horns, screeching tires, and your car's alarm create a disorienting noise. You attempt to move but are met with pain. The wrecked vehicle lies nearby.\
-                         Thoughts whirl: \"Was it my fault?\" Shaking, you reach for your phone to call for help. Surrounding sounds amplify: sirens, murmurs from assisting drivers, your own labored breathing. \
-                            Overwhelmed with fear, memories flood in, making you question if you'll ever drive confidently again."
+            They swerve directly at you. Time seems to crawl as panic hits. You desperately try to avoid the oncoming car, but a loud crash ensues. The violent jolt pushes you against your seatbelt, wind knocked out,\
+            vision blurred by flying windshield shards. The blare of horns, screeching tires, and your car's alarm create a disorienting noise. You attempt to move but are met with pain. The wrecked vehicle lies nearby.\
+            Thoughts whirl: \"Was it my fault?\" Shaking, you reach for your phone to call for help. Surrounding sounds amplify: sirens, murmurs from assisting drivers, your own labored breathing. \
+            Overwhelmed with fear, memories flood in, making you question if you'll ever drive confidently again."
     
     elif cue == 'ambush':
 
         if length=='long':
             instructions = "In the merciless grip of the midday sun, the desert becomes a vast, glaring oven. Each grain of sand below seems to pulse with latent menace. Your truck, sandwiched in the heart of a convoy,\
-                 feels like a metal trap. Every pore on your face tightens, every nerve strung to breaking point. You're hyper-aware, the weight of potential danger causing the very air to thicken around you. \
-                    Without warning, a deafening explosion ruptures the silence, its violent shockwave sending a visceral jolt down your spine. Your heart doesn't just race; it gallops, threatening to leap out \
-                        of your chest. The once-organized procession is now a scene of pandemonium, dominated by a monstrous plume of smoke where the lead truck once was. An icy dread laces your veins with the \
-                            horrifying realization: \"They've been obliterated.\" Everywhere you turn, you're met with a blinding, choking haze. A cacophony of shouts and orders, desperate and filled with panic,\
-                                 assaults your ears. But they sound distant, as if underwater, drowned out by the screaming alarm in your mind. Every fiber of your being feels electrified, vibrating with a frenzied energy.\
-                                     Commands echo around you, yet they seem abstract, distant. Your gut churns, twisting in on itself, each second stretching into an agonizing eternity. Amid the turmoil, a paralyzing thought\
-                                         hits: you've lost track of your position, your duty. Your mind races, thoughts scattering like leaves in a storm. Hands slick with sweat clutch your weapon so hard it's painful. \
-                                            Its cold metal feels volatile, ready to explode. The trigger yields beneath your grip, shots firing haphazardly. With every deafening report, the vision of home, of family, \
-                                                becomes more distant, more unreachable. The sharp, acrid stench of explosives fills your nostrils, a constant reminder of the looming threat. Waves of nausea, dread, and \
-                                                    raw vulnerability crash over you, pulling you deeper into a vortex of overwhelming terror."
+            feels like a metal trap. Every pore on your face tightens, every nerve strung to breaking point. You're hyper-aware, the weight of potential danger causing the very air to thicken around you. \
+            Without warning, a deafening explosion ruptures the silence, its violent shockwave sending a visceral jolt down your spine. Your heart doesn't just race; it gallops, threatening to leap out \
+            of your chest. The once-organized procession is now a scene of pandemonium, dominated by a monstrous plume of smoke where the lead truck once was. An icy dread laces your veins with the \
+            horrifying realization: \"They've been obliterated.\" Everywhere you turn, you're met with a blinding, choking haze. A cacophony of shouts and orders, desperate and filled with panic,\
+            assaults your ears. But they sound distant, as if underwater, drowned out by the screaming alarm in your mind. Every fiber of your being feels electrified, vibrating with a frenzied energy.\
+            Commands echo around you, yet they seem abstract, distant. Your gut churns, twisting in on itself, each second stretching into an agonizing eternity. Amid the turmoil, a paralyzing thought\
+            hits: you've lost track of your position, your duty. Your mind races, thoughts scattering like leaves in a storm. Hands slick with sweat clutch your weapon so hard it's painful. \
+            Its cold metal feels volatile, ready to explode. The trigger yields beneath your grip, shots firing haphazardly. With every deafening report, the vision of home, of family, \
+            becomes more distant, more unreachable. The sharp, acrid stench of explosives fills your nostrils, a constant reminder of the looming threat. Waves of nausea, dread, and \
+            raw vulnerability crash over you, pulling you deeper into a vortex of overwhelming terror."
 
         elif length=='brief':
             instructions = "In the relentless desert sun, the horizon quivers with tension. You're part of a convoy, a vulnerable dot amidst endless dunes. As your skin prickles with the heat, an earth-shattering blast \
-                rips through the silence, so close that it's disorienting. Panic instantly floods your senses. \"The lead truck... obliterated,\" the realization hits like a sledgehammer. The surrounding atmosphere becomes\
-                     a swirling mess of blinding smoke and chaos, while distant, desperate commands attempt to pierce through your mounting panic. Your every instinct is on overdrive; your stomach clenches with dread, your \
-                        heart gallops uncontrollably. Amidst this bedlam, you've lost your focus, your duty a forgotten whisper. Sweaty palms grip your weapon, discharging rounds haphazardly. The pungent stench of explosives \
-                             is suffocating. Thoughts of home, love, and safety seem cruelly distant as you're consumed by an all-encompassing terror."
+            rips through the silence, so close that it's disorienting. Panic instantly floods your senses. \"The lead truck... obliterated,\" the realization hits like a sledgehammer. The surrounding atmosphere becomes\
+            a swirling mess of blinding smoke and chaos, while distant, desperate commands attempt to pierce through your mounting panic. Your every instinct is on overdrive; your stomach clenches with dread, your \
+            heart gallops uncontrollably. Amidst this bedlam, you've lost your focus, your duty a forgotten whisper. Sweaty palms grip your weapon, discharging rounds haphazardly. The pungent stench of explosives \
+            is suffocating. Thoughts of home, love, and safety seem cruelly distant as you're consumed by an all-encompassing terror."
+            
+    elif cue == 'neutral':
+        if length == 'brief':
+            instructions = "The bicameral legislature is a form of government in which legislative authority is divided between two separate assemblies or chambers. This system is used in a number of countries today, \
+            including the United Kingdom, the United States, and Australia. The two chambers of a bicameral legislature are typically referred to as the lower and upper houses, with each house having its own set of powers \
+            and responsibilities to fulfill. In most cases, the lower house is responsible for initiating legislation, while the upper house is responsible for reviewing and changing the proposed bills. The two houses \
+            also typically differ in terms of size, composition, and requirements for membership. For example, the lower house may have a larger number of members than the upper house."
 
     else:
         raise NotImplementedError
@@ -232,6 +249,13 @@ def retrieve_relaxation(cue, length):
                              and children chasing fireflies. Their laughter and melodies drift upwards, mingling with the evening air. Allow yourself to be fully present in this moment, embracing affirmations like,\
                                  \"I am at peace with the world,\" or \"I find beauty in stillness.\" Slowly, as you're ready to transition back, take another deep breath. Begin to notice your immediate environment.\
                                   Gently wiggle your fingers and toes, grounding yourself. When you feel anchored, open your eyes, holding onto the serene essence of a city at twilight."
+
+    elif cue == 'vacuum':
+        instructions = "Press the on/off button again to stop the vacuum cleaner. When the vacuum cleaner is running, press the suction level button to switch to the turbo mode (MAX level); meanwhile, the MAX indicator \
+            will be white. Press the suction level button again to switch to the standard mode. When the battery level is sufficient, the battery level indicator is white. When the vacuum cleaner runs at a low battery level, \
+                the indicator is red; if so, the vacuum cleaner cannot be switched to the turbo mode. When the battery runs out, the vacuum cleaner automatically turns off. Before charging, make sure that the power adapter is \
+                    well connected to the electrical outlet and the vacuum cleaner. When charging, the battery level indicator is breathing. Once the battery is fully charged, the battery level indicator goes off. If you charge \
+                        the vacuum cleaner while its battery is full, the battery level indicator will breath 20 seconds then go off. Press and hold the on/off button  for 1 second, then the vacuum cleaner starts working and it runs on the standard mode by default. You can switch the mode as needed."
 
     else:
 

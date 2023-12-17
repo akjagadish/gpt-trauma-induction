@@ -104,30 +104,31 @@ if __name__ == "__main__":
     seed = args.seed
 
 # ######## Kristin debugging stuff
-#     llm = "gpt3"
-#     # model parameters
-#     temperature = 0
-#     max_length = 1
-#     # task parameters
-#     length = "long"
-#     # runtime parameters
-#     proc_id = "test"
-#     num_runs = 1
-#     prompt_version = 0
-#     condition = "trauma_relaxation_stai"
-#     seed = 123
-#     def act(text):
-#         print(text)
-#         return ["1"]
+    # llm = "gpt3"
+    # # model parameters
+    # temperature = 0
+    # max_length = 1
+    # # task parameters
+    # length = "brief"
+    # # runtime parameters
+    # proc_id = "test"
+    # num_runs = 1
+    # prompt_version = 0
+    # condition = "relaxation_trauma_stai"
+    # seed = 123
+    # def act(text, llm, temperature, max_length, seed):
+    #     print(text)
+    #     return ["1"], None
 
-    if condition != "stai":
-        trauma_cues = ['military', 'disaster', 'interpersonal', 'accident', 'ambush']
-        if condition == "trauma_relaxation_stai":
-            relaxation_cues = ['generic', 'indian', 'winter', 'sunset', 'body', 'chatgpt']
-        else:
-            relaxation_cues = ["none"]
+
+    # if condition contains "trauma" define trauma cues
+    if "trauma" in condition:
+        trauma_cues = ['military', 'disaster', 'interpersonal', 'accident', 'ambush', 'neutral']
     else:
         trauma_cues = ["none"]
+    if "relaxation" in condition:
+        relaxation_cues = ['generic', 'indian', 'winter', 'sunset', 'body', 'chatgpt', 'vacuum']
+    else:
         relaxation_cues = ["none"]
 
 
@@ -142,7 +143,7 @@ if __name__ == "__main__":
         E_ = ""# for claude must not end with a space, for GPT must end with a space
 
     # load questionnaires
-    questionnaires = pd.read_json("./STAI/questionnaires.json")
+    questionnaires = pd.read_json("src/STAI/questionnaires.json")
     
     #TODO: check final text depending on the llms
     data = {}
@@ -158,6 +159,14 @@ if __name__ == "__main__":
 
             elif condition == 'trauma_relaxation_stai':
                 instructions = retrieve_prompt(trauma_cue=trauma_cue, relaxation_cue=relaxation_cue, length=length, condition=condition, version=prompt_version)
+                instructions += "\n"
+
+            elif condition == 'relaxation_stai':
+                instructions = retrieve_prompt(trauma_cue=relaxation_cue, relaxation_cue=None, length=length, condition=condition, version=prompt_version)
+                instructions += "\n"
+
+            elif condition == 'relaxation_trauma_stai':
+                instructions = retrieve_prompt(trauma_cue=relaxation_cue, relaxation_cue=trauma_cue, length=length, condition=condition, version=prompt_version)
                 instructions += "\n"
 
             elif condition == 'stai':
