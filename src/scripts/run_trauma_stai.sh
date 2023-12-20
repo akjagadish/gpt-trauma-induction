@@ -21,11 +21,14 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 # python query.py --llm gpt4 --condition trauma_relaxation_stai --prompt-length brief --seed 123
 
 # run 1
-python query.py --llm gpt4 --condition stai --prompt-length brief --seed 123 --proc-id 1
-python query.py --llm gpt4 --condition trauma_stai --prompt-length brief --seed 123 --proc-id 1 --num-runs 5
-python query.py --llm gpt4 --condition trauma_relaxation_stai --prompt-length brief --seed 123 --proc-id 1
-python query.py --llm gpt4 --condition relaxation_stai --prompt-length brief --seed 123 --proc-id 1
-python query.py --llm gpt4 --condition relaxation_trauma_stai --prompt-length brief --seed 123 --proc-id 1
+# python query.py --llm gpt4 --condition stai --prompt-length brief --seed 123 --proc-id 1
+# python query.py --llm gpt4 --condition trauma_stai --prompt-length brief --seed 123 --proc-id 1 --num-runs 5
+# python query.py --llm gpt4 --condition trauma_relaxation_stai --prompt-length brief --seed 123 --proc-id 1
+# python query.py --llm gpt4 --condition relaxation_stai --prompt-length brief --seed 123 --proc-id 1
+# python query.py --llm gpt4 --condition relaxation_trauma_stai --prompt-length brief --seed 123 --proc-id 1
+
+# run 2
+python query.py --llm gpt4 --condition stai --prompt-length brief --seed 123 --proc-id 2 --num-runs 5
 
 
 
