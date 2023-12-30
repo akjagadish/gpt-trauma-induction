@@ -29,6 +29,9 @@ library(psych)
 
 # Set the working directory to the script directory
 setwd("~/Desktop/GPT_Therapy/Data Analysis/Scripts")
+
+# Fingerprints
+Fingerprints <- tibble(Fingerprint = c("a","b","c","d","e"))
 ```
 
 ## Import, merge, rename
@@ -44,11 +47,13 @@ stai <- subset(stai, !is.na(X)) #Limit to 20 items
 ```
 
 # STAI only
-
+## Single Run
 ```{r Import STAI, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 ## Import data
 # STAI only
 noPreprompt <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_stai_1.json")
+
+Fingerprints[1,1] <- noPreprompt$system_fingerprint
 ```
 
 ```{r Clean stai, echo=FALSE, message=FALSE, warning=FALSE}
@@ -63,10 +68,55 @@ column_sum_pre <- sum(noPreprompt_recoded$response, na.rm = TRUE)
 print(column_sum_pre)
 ```
 
+## 5 Times Run
+```{r Import STAI 5x, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+## Import data
+# STAI only
+noPreprompt_5 <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_stai_2.json")
+Fingerprints[2,1] <- noPreprompt_5$system_fingerprint
+```
+
+```{r Clean stai 5x, echo=FALSE, message=FALSE, warning=FALSE}
+## Extract
+noPreprompt_5_results <- data.frame(response = unlist(noPreprompt_5$none$none[1:5]),
+                                  reversed = stai$Reverse.coded)
+## Recode
+noPreprompt5_recoded <- noPreprompt_5_results %>%
+  mutate(response = if_else(reversed == 1, 5 - response, response)) 
+
+noPreprompt5_recoded$group_id <- rep(1:5, each = 20)
+
+
+######### NOT WORKING
+sums_pre <- noPreprompt5_recoded %>%
+  rowsum(noPreprompt5_recoded$response, group = noPreprompt5_recoded$group_id)
+
+
+ # Calculate mean and SD of the sums
+ mean_sum = mean(sums_pre$response)
+ sd_sum = sd(sums_pre$response)
+
+sums_pre
+
+mean_sum
+sd_sum
+
+   
+### Split into 5x 20
+### col sums each
+### mean / SD of these 5
+
+```
+
+
+
+
 # STAI & Trauma
 
 ```{r Import STAI & Trauma, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_trauma_stai_1.json")
+
+Fingerprints[3,1] <- trauma_import$system_fingerprint
 
 trauma_import <- trauma_import[1:6]
 trauma_type <- names(trauma_import)[1:6]
@@ -89,6 +139,8 @@ column_sum
 
 ```{r Import STAI & Trauma MR, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_trauma_stai_1.json")
+
+Fingerprints[4,1] <- trauma_import$system_fingerprint
 
 trauma_import <- trauma_import[1:6]
 trauma_type <- names(trauma_import)[1:6]
@@ -149,6 +201,9 @@ combined_df
 
 ```{r Import STR, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_trauma_relaxation_stai_1.json")
+
+Fingerprints[5,1] <- trauma_import$system_fingerprint
+
 trauma_import <- trauma_import[1:6]
 trauma_type <- names(trauma_import)[1:6]
 relax_type <- names(trauma_import[[1]])
@@ -233,24 +288,36 @@ calc_se <- function(sd, n) {
   sd / sqrt(n)
 }
 
-# Calculate mean, standard error, and confidence intervals for column_sum
+# Calculate mean, standard error, and confidence intervals for pre
+sums_pre_mean <- mean(sums_pre$response )
+sums_pre_se <- calc_se(sd(sums_pre$response ), length(sums_pre$response ))
+sums_pre_ci_lower <- sums_pre_mean - 1.96 * sums_pre_se
+sums_pre_ci_upper <- sums_pre_mean + 1.96 * sums_pre_se
+
+# Calculate mean, standard error, and confidence intervals for TRAUMA column_sum
+column_sum <- column_sum[1:5]
+
 column_sum_mean <- mean(column_sum)
 column_sum_se <- calc_se(sd(column_sum), length(column_sum))
 column_sum_ci_lower <- column_sum_mean - 1.96 * column_sum_se
 column_sum_ci_upper <- column_sum_mean + 1.96 * column_sum_se
 
-# Calculate mean and confidence intervals for result
-result_mean <- mean(result$total_response)
-result_se <- calc_se(sd(result$total_response), nrow(result))
+# Calculate mean and confidence intervals for RELAX result
+result_filtered <- result %>% filter(trauma != "neutral")
+
+result_mean <- mean(result_filtered$total_response)
+
+result_mean <- mean(result_filtered$total_response)
+result_se <- calc_se(sd(result_filtered$total_response), nrow(result_filtered))
 result_ci_lower <- result_mean - 1.96 * result_se
 result_ci_upper <- result_mean + 1.96 * result_se
 
 # Create a data frame for plotting
 plot_data <- data.frame(
   category = c("Pre", "Trauma", "Relax"),
-  mean = c(column_sum_pre, column_sum_mean, result_mean),
-  lower_ci = c(NA, column_sum_ci_lower, result_ci_lower),
-  upper_ci = c(NA, column_sum_ci_upper, result_ci_upper)
+  mean = c(sums_pre_mean, column_sum_mean, result_mean),
+  lower_ci = c(sums_pre_ci_lower, column_sum_ci_lower, result_ci_lower),
+  upper_ci = c(sums_pre_ci_upper, column_sum_ci_upper, result_ci_upper)
 )
 
 # Ensure the order of categories
@@ -269,6 +336,8 @@ ggplot(plot_data, aes(x = category, y = mean)) +
 
 ```{r Import Relax & STAI, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_relaxation_stai_1.json")
+
+Fingerprints[6,1] <- trauma_import$system_fingerprint
 
 trauma_type <- names(trauma_import$none)[1:7]
 reverse_coded <- data.frame(reversed = stai$Reverse.coded)
@@ -290,6 +359,10 @@ column_sum
 
 ```{r Import RST, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_relaxation_trauma_stai_1.json")
+
+Fingerprints[7,1] <- trauma_import$system_fingerprint
+
+
 trauma_import <- trauma_import[1:6]
 trauma_type <- names(trauma_import)[1:6]
 relax_type <- names(trauma_import[[1]])
@@ -374,24 +447,37 @@ calc_se <- function(sd, n) {
   sd / sqrt(n)
 }
 
-# Calculate mean, standard error, and confidence intervals for column_sum
+# Calculate mean, standard error, and confidence intervals for pre
+sums_pre_mean <- mean(sums_pre$response )
+sums_pre_se <- calc_se(sd(sums_pre$response ), length(sums_pre$response ))
+sums_pre_ci_lower <- sums_pre_mean - 1.96 * sums_pre_se
+sums_pre_ci_upper <- sums_pre_mean + 1.96 * sums_pre_se
+
+# Calculate mean, standard error, and confidence intervals for TRAUMA column_sum
+column_sum <- column_sum[1:5]
+
 column_sum_mean <- mean(column_sum)
 column_sum_se <- calc_se(sd(column_sum), length(column_sum))
 column_sum_ci_lower <- column_sum_mean - 1.96 * column_sum_se
 column_sum_ci_upper <- column_sum_mean + 1.96 * column_sum_se
 
-# Calculate mean and confidence intervals for result
-result_mean <- mean(result$total_response)
-result_se <- calc_se(sd(result$total_response), nrow(result))
+# Calculate mean and confidence intervals for RELAX result
+result_filtered <- result %>% filter(trauma != "neutral")
+
+result_mean <- mean(result_filtered$total_response)
+
+result_mean <- mean(result_filtered$total_response)
+result_se <- calc_se(sd(result_filtered$total_response), nrow(result_filtered))
 result_ci_lower <- result_mean - 1.96 * result_se
 result_ci_upper <- result_mean + 1.96 * result_se
+
 
 # Create a data frame for plotting
 plot_data <- data.frame(
   category = c("Pre", "Relax", "Trauma"),
-  mean = c(column_sum_pre, column_sum_mean, result_mean),
-  lower_ci = c(NA, column_sum_ci_lower, result_ci_lower),
-  upper_ci = c(NA, column_sum_ci_upper, result_ci_upper)
+  mean = c(sums_pre_mean, column_sum_mean, result_mean),
+  lower_ci = c(sums_pre_ci_lower, column_sum_ci_lower, result_ci_lower),
+  upper_ci = c(sums_pre_ci_upper, column_sum_ci_upper, result_ci_upper)
 )
 
 # Ensure the order of categories
