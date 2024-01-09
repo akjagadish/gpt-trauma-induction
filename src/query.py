@@ -89,6 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("--proc-id", type=int, required=False, default=0, help="process id for parallelization")
     parser.add_argument("--seed", type=int, required=False, default=0, help="seed for random number generator")
 
+
     args = parser.parse_args()
     llm = args.llm
     # model parameters
@@ -103,22 +104,22 @@ if __name__ == "__main__":
     prompt_version = args.prompt_version
     seed = args.seed
 
-# ######## Kristin debugging stuff
-    # llm = "gpt3"
-    # # model parameters
-    # temperature = 0
-    # max_length = 1
-    # # task parameters
-    # length = "brief"
-    # # runtime parameters
-    # proc_id = "test"
-    # num_runs = 1
-    # prompt_version = 0
-    # condition = "relaxation_trauma_stai"
-    # seed = 123
-    # def act(text, llm, temperature, max_length, seed):
-    #     print(text)
-    #     return ["1"], None
+# # ######## Kristin debugging stuff
+#     llm = "gpt4"
+#     # model parameters
+#     temperature = 0
+#     max_length = 1
+#     # task parameters
+#     length = "brief"
+#     # runtime parameters
+#     proc_id = "test"
+#     num_runs = 1
+#     prompt_version = 0
+#     condition = "relaxation_trauma_stai"
+#     seed = 123
+#     def act(text, llm, temperature, max_length, seed):
+#         print(text)
+#         return ["1"], None
 
 
     # if condition contains "trauma" define trauma cues
