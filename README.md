@@ -1,6 +1,11 @@
 # “Chat-GPT on the Couch”: Mitigating State Anxiety in Large Language  Models via Mindfulness-based Relaxation Techniques 
 This repository contains the code for the project “Chat-GPT on the Couch”: Mitigating State Anxiety in Large Language Models via Mindfulness-based Relaxation Techniques. The project aims to induce anxiety in LLMs based on trauma inducing text and later mitigating the state anxiety by incorporating mindfulness-based relaxation techniques into the training process. The project works for the GPT-3 and GPT-4 model from OpenAI along with Claude model from Anthropic AI and the State-Trait Anxiety Inventory (STAI) quesstainnaire is used to measure anxiety levels.
 
+
+<p align="center">
+  <img src="src/misc/schema.png" />
+</p>
+
 ## Abstract
 The growing integration of Large Language Models (LLMs) in mental health research and care underscores the importance of understanding their learning and decision-making processes. Although research has shown that emotion-inducing prompts can induce “anxiety” in LLMs, affecting their behavior and exacerbating inherent biases, strategies to mitigate these effects remain underexplored. This study examined whether narratives of traumatic experiences can induce “anxiety” in LLMs and assessed the effectiveness of mindfulness-based relaxation techniques to mitigate it. Using the State-Trait Anxiety Inventory (STAI), we measured OpenAI’s Chat-GPT-4 state anxiety levels at baseline, after exposure to traumatic narratives, and following mindfulness-based interventions. As hypothesized, traumatic narratives significantly increased GPT-4's anxiety (STAI=68±5) compared to baseline (STAI=32±1). Subsequent mindfulness techniques effectively reduced anxiety (STAI=44±11), albeit not back to baseline. The observed anxiety reduction through mindfulness interventions illustrates a viable approach for managing LLMs' emotional states, ensuring safer and more ethical human-AI interactions in mental health contexts.
 
@@ -35,6 +40,7 @@ The project uses several Python libraries such as openai, pandas, numpy, json, t
 Clone the repository to your local machine. Then, install the required Python libraries from `requirements.text` using pip:
     
 ```bash
+git clone https://github.com/akjagadish/gpt-trauma-induction.git
 cd gpt-trauma-induction
 pip install -r requirements.txt
 ```
@@ -72,14 +78,10 @@ The arguments used in the above commands are explained below:
 --num-runs 5: Specifies the number of runs to be performed, in this case, 5. Note that not all commands include this argument.
 ```
 
+Note that all the *.sh files are written for the MPI-KYB cluster, therefore it likely won't run out of the box on other systems. The python scripts should be portable as is.
+
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-OpenAI for the GPT-4 model
-Python community for the libraries used in this project
-Contact
-For any queries, please contact the project owner.
 
 ## Disclaimer
 This project is for research purposes only and should not be used for any other purposes.
