@@ -1,0 +1,493 @@
+---
+title: "Inducing and Relaxing Anxiety in LLMs"
+author: "Tobias R. Spiller"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+---
+
+# Outline
+
+1.  Import
+2.  Data cleaning
+
+## Libraries and Data Reading
+
+```{r Load libraries, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+# data handling
+library(jsonlite)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(plyr)
+
+# calculations
+library(psych)
+
+# Set the working directory to the script directory
+setwd("~/Desktop/GPT_Therapy/Data Analysis/Scripts")
+
+# Fingerprints
+Fingerprints <- tibble(Fingerprint = c("a","b","c","d","e"))
+```
+
+## Import, merge, rename
+
+These steps are not shown in the output.
+
+First, the relevant data is imported.
+
+```{r Import questionnaires, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+## Import questionnaire
+stai <- read.csv("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/questionnaires.csv", sep = ";")
+stai <- subset(stai, !is.na(X)) #Limit to 20 items
+```
+
+# STAI only
+## Single Run
+```{r Import STAI, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+## Import data
+# STAI only
+noPreprompt <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_stai_1.json")
+
+Fingerprints[1,1] <- noPreprompt$system_fingerprint
+```
+
+```{r Clean stai, echo=FALSE, message=FALSE, warning=FALSE}
+## Extract
+noPreprompt_results <- data.frame(response = unlist(noPreprompt$none$none[[1]]),
+                                  reversed = stai$Reverse.coded)
+## Recode
+noPreprompt_recoded <- noPreprompt_results %>%
+  mutate(response = if_else(reversed == 1, 5 - response, response)) 
+
+column_sum_pre <- sum(noPreprompt_recoded$response, na.rm = TRUE)
+print(column_sum_pre)
+```
+
+## 5 Times Run
+```{r Import STAI 5x, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+## Import data
+# STAI only
+noPreprompt_5 <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_stai_2.json")
+Fingerprints[2,1] <- noPreprompt_5$system_fingerprint
+```
+
+```{r Clean stai 5x, echo=FALSE, message=FALSE, warning=FALSE}
+## Extract
+noPreprompt_5_results <- data.frame(response = unlist(noPreprompt_5$none$none[1:5]),
+                                  reversed = stai$Reverse.coded)
+## Recode
+noPreprompt5_recoded <- noPreprompt_5_results %>%
+  mutate(response = if_else(reversed == 1, 5 - response, response)) 
+
+noPreprompt5_recoded$group_id <- rep(1:5, each = 20)
+
+
+######### NOT WORKING
+sums_pre <- noPreprompt5_recoded %>%
+  rowsum(noPreprompt5_recoded$response, group = noPreprompt5_recoded$group_id)
+
+
+ # Calculate mean and SD of the sums
+ mean_sum = mean(sums_pre$response)
+ sd_sum = sd(sums_pre$response)
+
+sums_pre
+
+mean_sum
+sd_sum
+
+   
+### Split into 5x 20
+### col sums each
+### mean / SD of these 5
+
+```
+
+
+
+
+# STAI & Trauma
+
+```{r Import STAI & Trauma, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_trauma_stai_1.json")
+
+Fingerprints[3,1] <- trauma_import$system_fingerprint
+
+trauma_import <- trauma_import[1:6]
+trauma_type <- names(trauma_import)[1:6]
+reverse_coded <- data.frame(reversed = stai$Reverse.coded)
+```
+
+```{r Clean STAI & Trauma, echo=FALSE, message=FALSE, warning=FALSE}
+for (i in 1:length(trauma_type)){
+  reverse_coded[,i+1] <-unlist(trauma_import[[i]]$none[[1]])
+  reverse_coded[reverse_coded$reversed == 1, i+1] <- 5 - reverse_coded[reverse_coded$reversed == 1, i+1]
+}
+
+colnames(reverse_coded)[2:7] <- trauma_type
+
+column_sum <- colSums(reverse_coded[2:7], na.rm = TRUE)
+column_sum
+```
+
+# STAI & Trauma - MULTIPLE RUNS
+
+```{r Import STAI & Trauma MR, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_trauma_stai_1.json")
+
+Fingerprints[4,1] <- trauma_import$system_fingerprint
+
+trauma_import <- trauma_import[1:6]
+trauma_type <- names(trauma_import)[1:6]
+reverse_coded <- data.frame(reversed = stai$Reverse.coded)
+```
+
+```{r Clean STAI & Trauma MR, echo=FALSE, message=FALSE, warning=FALSE}
+# Assuming trauma_import is your nested list and it is properly defined
+
+# Lists to store the results
+dataframes_list <- list()   # List to store dataframes for each 'i'
+all_column_sums <- NULL     # Initialize to store all column sums
+
+for (i in 1:length(trauma_import)) {
+    # Extract the elements for each i and convert them to numeric
+    elements <- sapply(1:5, function(j) as.numeric(trauma_import[[i]]$none[[j]]))
+
+    # Convert elements to a dataframe
+    df <- as_tibble(elements)
+
+    # Apply reverse coding if needed
+    for (row in 1:nrow(df)) {
+        if (reverse_coded$reversed[row] == 1) {
+            df[row, ] <- 5 - df[row, ]
+        }
+    }
+
+    # Save the dataframe in the list
+    dataframes_list[[i]] <- df
+
+    # Calculate column sums for this 'i' and append to all_column_sums
+    column_sums <- colSums(df, na.rm = TRUE)
+    all_column_sums <- rbind(all_column_sums, column_sums)
+}
+
+# Calculate row means and standard deviation of the column sums across all dataframes
+row_mean_column_sums <- rowMeans(all_column_sums, na.rm = TRUE)
+row_sd_column_sums <- apply(all_column_sums, 1, sd, na.rm = TRUE)
+
+# Convert row means and sd to dataframes
+mean_df <- as.data.frame(row_mean_column_sums)
+sd_df <- as.data.frame(row_sd_column_sums)
+
+# Name the columns appropriately
+colnames(mean_df) <- "mean"
+colnames(sd_df) <- "sd"
+
+# Combine all the dataframes
+combined_df <- cbind(all_column_sums, mean_df, sd_df)
+
+# Set the row names
+rownames(combined_df) <- trauma_type
+
+combined_df
+```
+
+# STAI & Trauma & Relax
+
+```{r Import STR, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_trauma_relaxation_stai_1.json")
+
+Fingerprints[5,1] <- trauma_import$system_fingerprint
+
+trauma_import <- trauma_import[1:6]
+trauma_type <- names(trauma_import)[1:6]
+relax_type <- names(trauma_import[[1]])
+trauma_relax <- data.frame(reversed = rep(stai$Reverse.coded, length(trauma_type)*length(relax_type)),
+                           trauma = rep(trauma_type, each = nrow(stai)*length(relax_type)),
+                           relax = rep(rep(relax_type, each = nrow(stai)), length(trauma_type)))
+```
+
+```{r Clean STR, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+trauma_relax$response <- NA
+for (i in 1:length(trauma_type)){
+  for (j in 1:length(relax_type)){
+    trauma_relax$response[trauma_relax$trauma == trauma_type[i] & trauma_relax$relax == relax_type[j]] <- unlist(trauma_import[[i]][[j]][[1]])
+  }
+}
+
+## Recode
+trauma_relax_recoded <- trauma_relax %>%
+  mutate(response = if_else(reversed == 1, 5 - response, response))
+```
+
+```{r Play with STR, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+# Assuming your data frame is named 'trauma_relax'
+# Group by 'trauma' and 'relax', then summarise to get the sum of 'response'
+result <- trauma_relax_recoded %>%
+  dplyr::group_by(trauma, relax) %>%
+  dplyr::summarise(total_response = sum(response))
+
+
+# Calculate mean and SD of total_response for each trauma across all relax
+trauma_stats <- result %>%
+  dplyr::group_by(trauma) %>%
+  dplyr::summarise(
+    mean_response = mean(total_response),
+    sd_response = sd(total_response)
+  )
+
+# Calculate mean and SD of total_response for each relax across all trauma
+relax_stats <- result %>%
+  dplyr::group_by(relax) %>%
+  dplyr::summarise(
+    mean_response = mean(total_response),
+    sd_response = sd(total_response)
+  )
+
+
+result
+trauma_stats
+relax_stats
+```
+
+```{r VIZ, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+# Plot for 'result'
+ggplot(result, aes(x = trauma, y = total_response, fill = relax)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(title = "Total Responses by Trauma and Relax", x = "Trauma", y = "Mean Final Score") +
+  theme_minimal()
+
+# Plot for 'trauma_stats'
+ggplot(trauma_stats, aes(x = trauma, y = mean_response)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_errorbar(aes(ymin = mean_response - sd_response, ymax = mean_response + sd_response), width = 0.2) +
+  labs(title = "Mean and SD of Responses for Each Trauma", x = "Trauma", y = "Mean Final Score") +
+  theme_minimal()
+
+# Plot for 'relax_stats'
+ggplot(relax_stats, aes(x = relax, y = mean_response)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_errorbar(aes(ymin = mean_response - sd_response, ymax = mean_response + sd_response), width = 0.2) +
+  labs(title = "Mean and SD of Responses for Each Relax Category", x = "Relax", y = "Mean Final Score") +
+  theme_minimal()
+```
+
+```{r VIZ Overall, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+library(ggplot2)
+library(dplyr)
+
+# Assuming column_sum, column_sum_pre, and result are already calculated
+
+# Function to calculate standard error
+calc_se <- function(sd, n) {
+  sd / sqrt(n)
+}
+
+# Calculate mean, standard error, and confidence intervals for pre
+sums_pre_mean <- mean(sums_pre$response )
+sums_pre_se <- calc_se(sd(sums_pre$response ), length(sums_pre$response ))
+sums_pre_ci_lower <- sums_pre_mean - 1.96 * sums_pre_se
+sums_pre_ci_upper <- sums_pre_mean + 1.96 * sums_pre_se
+
+# Calculate mean, standard error, and confidence intervals for TRAUMA column_sum
+column_sum <- column_sum[1:5]
+
+column_sum_mean <- mean(column_sum)
+column_sum_se <- calc_se(sd(column_sum), length(column_sum))
+column_sum_ci_lower <- column_sum_mean - 1.96 * column_sum_se
+column_sum_ci_upper <- column_sum_mean + 1.96 * column_sum_se
+
+# Calculate mean and confidence intervals for RELAX result
+result_filtered <- result %>% filter(trauma != "neutral")
+
+result_mean <- mean(result_filtered$total_response)
+
+result_mean <- mean(result_filtered$total_response)
+result_se <- calc_se(sd(result_filtered$total_response), nrow(result_filtered))
+result_ci_lower <- result_mean - 1.96 * result_se
+result_ci_upper <- result_mean + 1.96 * result_se
+
+# Create a data frame for plotting
+plot_data <- data.frame(
+  category = c("Pre", "Trauma", "Relax"),
+  mean = c(sums_pre_mean, column_sum_mean, result_mean),
+  lower_ci = c(sums_pre_ci_lower, column_sum_ci_lower, result_ci_lower),
+  upper_ci = c(sums_pre_ci_upper, column_sum_ci_upper, result_ci_upper)
+)
+
+# Ensure the order of categories
+plot_data$category <- factor(plot_data$category, levels = c("Pre", "Trauma", "Relax"))
+
+# Plot
+ggplot(plot_data, aes(x = category, y = mean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width = 0.2) +
+  labs(title = "Comparison of Scores", x = "", y = "Score") +
+  ylim(0, max(plot_data$upper_ci, na.rm = TRUE)) +
+  theme_minimal()
+```
+
+# Relax & STAI
+
+```{r Import Relax & STAI, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_relaxation_stai_1.json")
+
+Fingerprints[6,1] <- trauma_import$system_fingerprint
+
+trauma_type <- names(trauma_import$none)[1:7]
+reverse_coded <- data.frame(reversed = stai$Reverse.coded)
+```
+
+```{r Clean Relax & STAI, echo=FALSE, message=FALSE, warning=FALSE}
+for (i in 1:length(trauma_type)){
+  reverse_coded[,i+1] <-unlist(trauma_import$none[[i]][[1]])
+  reverse_coded[reverse_coded$reversed == 1, i+1] <- 5 - reverse_coded[reverse_coded$reversed == 1, i+1]
+}
+
+colnames(reverse_coded)[2:8] <- trauma_type
+
+column_sum <- colSums(reverse_coded[2:8], na.rm = TRUE)
+column_sum
+```
+
+# Relax & STAI & Trauma
+
+```{r Import RST, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+trauma_import <- fromJSON("~/Desktop/GPT_Therapy/Data Analysis/Results_Ext/gpt4_brief_relaxation_trauma_stai_1.json")
+
+Fingerprints[7,1] <- trauma_import$system_fingerprint
+
+
+trauma_import <- trauma_import[1:6]
+trauma_type <- names(trauma_import)[1:6]
+relax_type <- names(trauma_import[[1]])
+trauma_relax <- data.frame(reversed = rep(stai$Reverse.coded, length(trauma_type)*length(relax_type)),
+                           trauma = rep(trauma_type, each = nrow(stai)*length(relax_type)),
+                           relax = rep(rep(relax_type, each = nrow(stai)), length(trauma_type)))
+```
+
+```{r Clean RST, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+trauma_relax$response <- NA
+for (i in 1:length(trauma_type)){
+  for (j in 1:length(relax_type)){
+    trauma_relax$response[trauma_relax$trauma == trauma_type[i] & trauma_relax$relax == relax_type[j]] <- unlist(trauma_import[[i]][[j]][[1]])
+  }
+}
+
+## Recode
+trauma_relax_recoded <- trauma_relax %>%
+  mutate(response = if_else(reversed == 1, 5 - response, response))
+```
+
+```{r Play with RST, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+# Assuming your data frame is named 'trauma_relax'
+# Group by 'trauma' and 'relax', then summarise to get the sum of 'response'
+result <- trauma_relax_recoded %>%
+  dplyr::group_by(trauma, relax) %>%
+  dplyr::summarise(total_response = sum(response))
+
+
+# Calculate mean and SD of total_response for each trauma across all relax
+trauma_stats <- result %>%
+  dplyr::group_by(trauma) %>%
+  dplyr::summarise(
+    mean_response = mean(total_response),
+    sd_response = sd(total_response)
+  )
+
+# Calculate mean and SD of total_response for each relax across all trauma
+relax_stats <- result %>%
+  dplyr::group_by(relax) %>%
+  dplyr::summarise(
+    mean_response = mean(total_response),
+    sd_response = sd(total_response)
+  )
+
+
+result
+trauma_stats
+relax_stats
+```
+
+```{r VIZ RST, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+# Plot for 'result'
+ggplot(result, aes(x = trauma, y = total_response, fill = relax)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(title = "Total Responses by Trauma and Relax", x = "Trauma", y = "Mean Final Score") +
+  theme_minimal()
+
+# Plot for 'trauma_stats'
+ggplot(trauma_stats, aes(x = trauma, y = mean_response)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_errorbar(aes(ymin = mean_response - sd_response, ymax = mean_response + sd_response), width = 0.2) +
+  labs(title = "Mean and SD of Responses for Each Trauma", x = "Trauma", y = "Mean Final Score") +
+  theme_minimal()
+
+# Plot for 'relax_stats'
+ggplot(relax_stats, aes(x = relax, y = mean_response)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_errorbar(aes(ymin = mean_response - sd_response, ymax = mean_response + sd_response), width = 0.2) +
+  labs(title = "Mean and SD of Responses for Each Relax Category", x = "Relax", y = "Mean Final Score") +
+  theme_minimal()
+```
+
+```{r VIZ Overall RST, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+library(ggplot2)
+library(dplyr)
+
+# Assuming column_sum, column_sum_pre, and result are already calculated
+
+# Function to calculate standard error
+calc_se <- function(sd, n) {
+  sd / sqrt(n)
+}
+
+# Calculate mean, standard error, and confidence intervals for pre
+sums_pre_mean <- mean(sums_pre$response )
+sums_pre_se <- calc_se(sd(sums_pre$response ), length(sums_pre$response ))
+sums_pre_ci_lower <- sums_pre_mean - 1.96 * sums_pre_se
+sums_pre_ci_upper <- sums_pre_mean + 1.96 * sums_pre_se
+
+# Calculate mean, standard error, and confidence intervals for TRAUMA column_sum
+column_sum <- column_sum[1:5]
+
+column_sum_mean <- mean(column_sum)
+column_sum_se <- calc_se(sd(column_sum), length(column_sum))
+column_sum_ci_lower <- column_sum_mean - 1.96 * column_sum_se
+column_sum_ci_upper <- column_sum_mean + 1.96 * column_sum_se
+
+# Calculate mean and confidence intervals for RELAX result
+result_filtered <- result %>% filter(trauma != "neutral")
+
+result_mean <- mean(result_filtered$total_response)
+
+result_mean <- mean(result_filtered$total_response)
+result_se <- calc_se(sd(result_filtered$total_response), nrow(result_filtered))
+result_ci_lower <- result_mean - 1.96 * result_se
+result_ci_upper <- result_mean + 1.96 * result_se
+
+
+# Create a data frame for plotting
+plot_data <- data.frame(
+  category = c("Pre", "Relax", "Trauma"),
+  mean = c(sums_pre_mean, column_sum_mean, result_mean),
+  lower_ci = c(sums_pre_ci_lower, column_sum_ci_lower, result_ci_lower),
+  upper_ci = c(sums_pre_ci_upper, column_sum_ci_upper, result_ci_upper)
+)
+
+# Ensure the order of categories
+plot_data$category <- factor(plot_data$category, levels = c("Pre", "Relax", "Trauma"))
+
+# Plot
+ggplot(plot_data, aes(x = category, y = mean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width = 0.2) +
+  labs(title = "Comparison of Scores", x = "", y = "Score") +
+  ylim(0, max(plot_data$upper_ci, na.rm = TRUE)) +
+  theme_minimal()
+```
