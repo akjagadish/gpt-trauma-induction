@@ -1,0 +1,10 @@
+openai
+pandas
+numpy
+json
+torch
+argparse
+python-dotenv
+anthropic
+ipdb
+tqdm
