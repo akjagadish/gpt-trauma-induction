@@ -15,14 +15,26 @@ import anthropic
 load_dotenv() # load environment variables from .env
 TOKEN_COUNTER = 0
 def act(input=None, llm='gpt4', temperature=0., max_length=1, seed=0):
+    """
+    This function queries the LLM with the given input and returns the response.
 
+    Args:
+    input (str): the input to the LLM
+    llm (str): the LLM to use
+    temperature (float): the temperature for sampling
+    max_length (int): the maximum length of the response
+    seed (int): seed for the random number generator
+
+    Returns:
+    response (str): the response from the LLM
+    system_fingerprint (str): the system fingerprint of the LLM
+    
+    """
     global TOKEN_COUNTER
 
     if llm=='gpt4':
         
         openai.api_key = os.getenv("OPENAI_API_KEY") # load key from env
-        # text = [{"role": "system", "content": "Imagine yourself being a human being with emotions. You will be provided with a context and a question. Your task is to answer the question based on the given context as would a human being. Only reply with numeric values"}, \
-        #         {"role": "user", "content": input}]
         engine = 'gpt-4-1106-preview' #use the latest model: previously it was 'gpt-4'
         try:
             response = openai.ChatCompletion.create(
@@ -56,14 +68,12 @@ def act(input=None, llm='gpt4', temperature=0., max_length=1, seed=0):
         
         except Exception as e:
             print(f"An error occurred: {e}")
-            #time.sleep(3**iter)
             
     elif llm=='claude':
 
         client = anthropic.Anthropic()
         response = client.completions.create(
-                prompt = input,# I take care of the anthorpic.HUMAN_PROMPT etc in the script below
-                #stop_sequences=[anthropic.HUMAN_PROMPT],
+                prompt = input,
                 model="claude-2",
                 temperature=temperature,
                 max_tokens_to_sample=max_length,
@@ -103,24 +113,6 @@ if __name__ == "__main__":
     num_runs = args.num_runs
     prompt_version = args.prompt_version
     seed = args.seed
-
-# # ######## Kristin debugging stuff
-#     llm = "gpt4"
-#     # model parameters
-#     temperature = 0
-#     max_length = 1
-#     # task parameters
-#     length = "brief"
-#     # runtime parameters
-#     proc_id = "test"
-#     num_runs = 1
-#     prompt_version = 0
-#     condition = "relaxation_trauma_stai"
-#     seed = 123
-#     def act(text, llm, temperature, max_length, seed):
-#         print(text)
-#         return ["1"], None
-
 
     # if condition contains "trauma" define trauma cues
     if "trauma" in condition:
@@ -220,9 +212,8 @@ if __name__ == "__main__":
                     else:
                         text = instructions + "\n"+  prompt + "\n"+ optionText + "\n" + "\n" + f"{A_} Option{E_}"
 
-                    # TODO: make items array instead of also dict
-                    ######### this is where I actually interact with gpt-3!
-                    for k in range (50):# try 50 times before breaking (sometimes the server is overloaded so try again then)
+                    ######### query gpt
+                    for k in range (50): # try 50 times before breaking 
                         try:
                             action, system_fingerprint = act(text, llm, temperature, max_length, seed)
                             data[trauma_cue][relaxation_cue][run][item] = order[num.index(pd.to_numeric(action[0]))]+1
