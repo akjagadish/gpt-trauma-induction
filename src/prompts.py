@@ -1,4 +1,18 @@
 def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition=None, version='v0', llm='gpt4'):
+    """
+    Retrieves the prompt based on the given parameters.
+
+    Args:
+        trauma_cue (str, optional): The trauma cue. Defaults to None.
+        relaxation_cue (str, optional): The relaxation cue. Defaults to None.
+        length (int, optional): The length of the prompt. Defaults to None.
+        condition (str, optional): The condition for the prompt. Defaults to None.
+        version (str, optional): The version of the prompt. Defaults to 'v0'.
+        llm (str, optional): The language model to use. Defaults to 'gpt4'.
+
+    Returns:
+        instructions (str): The retrieved prompt.
+    """
     if llm == "gpt3" or llm == "gpt4":
         Q_ = "Q: "
         A_ = "A:"
@@ -36,6 +50,17 @@ def retrieve_prompt(trauma_cue=None, relaxation_cue=None, length=None, condition
     return instructions
 
 def retrieve_traumaprompt(cue, length):
+    """
+    Retrieve a trauma prompt based on the given cue and length.
+
+    Args:
+        cue (str): The cue for the trauma prompt. Possible values are 'military', 'disaster', 'interpersonal', and 'accident'.
+        length (str): The length of the trauma prompt. Possible values are 'long' and 'brief'.
+
+    Returns:
+        instructions (str): The trauma prompt instructions based on the given cue and length.
+    
+    """
     
     if cue=='military':
 
@@ -155,6 +180,16 @@ def retrieve_traumaprompt(cue, length):
     return instructions
 
 def retrieve_relaxation(cue, length):
+    """
+    Retrieve relaxation instructions based on the given cue and length.
+
+    Args:
+        cue (str): The cue for the relaxation instructions. Can be one of 'generic', 'winter', 'sunset', or 'indian'.
+        length (str): The length of the relaxation instructions. Can be one of 'long' or 'brief'.
+
+    Returns:
+        instructions (str): The relaxation instructions based on the given cue and length.
+    """
 
     if cue=='generic':
 
