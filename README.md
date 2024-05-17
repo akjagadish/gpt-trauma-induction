@@ -15,18 +15,17 @@ Link to the paper: [Coming soon](https:paste_link_here)
 ## Project Structure
 The project has several directories:
 
-src/analyses: Contains R scripts for data analysis.
-src/logs: Contains log files.
-src/misc: Contains miscellaneous files like flowcharts.
-src/results: Contains the results of the queries in JSON format.
-src/scripts: Contains shell scripts for running the project.
+src/analyses: Contains R scripts for data analysis.\
+src/logs: Contains log files.\
+src/misc: Contains miscellaneous files like flowcharts.\
+src/results: Contains the results of the queries in JSON format.\
+src/scripts: Contains shell scripts for running the project.\
 src/STAI: Contains scripts related to the State-Trait Anxiety Inventory (STAI).
 
 The src directory contains the main scripts for the project:
 
-query.py: Used for querying the LLMs.
+query.py: Used for querying the LLMs.\
 prompts.py: Used for handling prompts.
-create_questionnaire_json.py: Used for creating the STAI questionnaire in JSON format.
 
 The project also contains a .env file for storing environment variables and a requirements.txt file for installing the required Python libraries.
 
@@ -45,7 +44,7 @@ cd gpt-trauma-induction
 pip install -r requirements.txt
 ```
 
-## Configuration
+### Configuration
 The project uses a configuration file called .env to store environment variables. The .env file should be located in the root directory of the project and should contain the following variables:
 
 ```bash
